@@ -45,9 +45,9 @@ directories:
 
         # Optional: tmp2 directory.  If specified, will be passed to
         # chia plots create as -2.  Only one tmp2 directory is supported.
-        # tmp2: /mnt/tmp/a
+        tmp2: /mnt/tmp/a
 
-        # One or more directories; the scheduler will use all of them.
+        # Optional: One or more directories; the scheduler will use all of them.
         # These again are presumed to be on independent physical devices,
         # so writes (plot jobs) and reads (archivals) can be scheduled
         # to minimize IO contention.

@@ -7,7 +7,7 @@ import pendulum
 import psutil
 
 # Plotman libraries
-from . import job
+from . import job, configuration
 
 # Constants
 MIN = 60  # Seconds
@@ -100,16 +100,19 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
     youngest_job_age = min(jobs, key=job.Job.get_time_wall).get_time_wall() if jobs else MAX_AGE
     global_stagger = int(sched_cfg.global_stagger_m * MIN)
 
-    # (disksizeBool, disksize, pathdi) = anyTmpDirIsNearlyFull(dir_cfg)
-
     if youngest_job_age < global_stagger:
         wait_reason = 'stagger (%ds/%ds)' % (youngest_job_age, global_stagger)
+
     elif len(jobs) >= sched_cfg.global_max_jobs:
         wait_reason = 'max jobs (%d)' % sched_cfg.global_max_jobs
+
     else:
+
         tmp_to_all_phases = [(d, job.job_phases_for_tmpdir(d, jobs)) for d in dir_cfg.tmp]
+
         eligible = [(d, phases) for (d, phases) in tmp_to_all_phases
                     if phases_permit_new_job(phases, d, sched_cfg, dir_cfg)]
+
         rankable = [(d, phases[0]) if phases else (d, (999, 999)) for (d, phases) in eligible]
 
         if not eligible:
@@ -117,19 +120,24 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
         else:
             # Plot to oldest tmpdir.
             tmpdir = max(rankable, key=operator.itemgetter(1))[0]
-
             # Select the dst dir least recently selected
-            dir2ph = {d: ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
-                      if d in dir_cfg.dst}
-            unused_dirs = [d for d in dir_cfg.dst if d not in dir2ph.keys()]
+            (is_dst, dst_dir) = configuration.get_dst_directories(dir_cfg)
+
             dstdir = ''
-            if len(unused_dirs) > 0:
-                dstdir = random.choice(unused_dirs)
-            else:
-                dstdir = max(dir2ph, key=dir2ph.get)
+
+            if is_dst:
+
+                dir2ph = {d: ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
+                          if d in dst_dir}
+
+                unused_dirs = [d for d in dst_dir if d not in dir2ph.keys()]
+
+                if len(unused_dirs) > 0:
+                    dstdir = random.choice(unused_dirs)
+                else:
+                    dstdir = tmpdir
 
             logfile = os.path.join(
-                #                dir_cfg.log, datetime.now().strftime('%Y-%m-%d-%H:%M:%S.log')
                 dir_cfg.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'
             )
 
@@ -139,15 +147,19 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
                          '-u', str(plotting_cfg.n_buckets),
                          '-b', str(plotting_cfg.job_buffer),
                          '-t', tmpdir,
-                         '-d', dstdir]
+                         '-d', tmpdir]
+
             if plotting_cfg.e:
                 plot_args.append('-e')
+
             if plotting_cfg.farmer_pk is not None:
                 plot_args.append('-f')
                 plot_args.append(plotting_cfg.farmer_pk)
+
             if plotting_cfg.pool_pk is not None:
                 plot_args.append('-p')
                 plot_args.append(plotting_cfg.pool_pk)
+
             if dir_cfg.tmp2 is not None:
                 plot_args.append('-2')
                 plot_args.append(dir_cfg.tmp2)

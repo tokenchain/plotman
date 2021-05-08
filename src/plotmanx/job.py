@@ -28,7 +28,6 @@ def is_plotting_cmdline(cmdline):
             and 'create' == cmdline[3]
     )
 
-
 # This is a cmdline argument fix for https://github.com/ericaltendorf/plotman/issues/41
 def cmdline_argfix(cmdline):
     known_keys = 'krbut2dnea'
@@ -91,9 +90,13 @@ class Job:
                     if proc.pid in cached_jobs_by_pid.keys():
                         jobs.append(cached_jobs_by_pid[proc.pid])  # Copy from cache
                     else:
-                        job = Job(proc, logroot)
-                        if not job.help:
-                            jobs.append(job)
+                        try:
+                            job = Job(proc, logroot)
+                            if not job.help:
+                                jobs.append(job)
+                        except Exception as e:
+                            print("Error:", e)
+                            pass
 
         return jobs
 

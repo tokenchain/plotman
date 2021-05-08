@@ -76,7 +76,7 @@ clean_repo() {
   python3 -m twine upload dist/* --verbose
 
   echo "please update the package by using this command"
-  echo "pip3 install plotmanx==$VERSION"
+  echo "python3 -m pip install plotmanx==$VERSION"
   echo "pi plotmanx==$VERSION"
   echo "pc plotmanx==$VERSION"
   echo "wait 30 seconds until it gets uploaded online..."

@@ -4,7 +4,7 @@ import os
 import psutil
 import texttable as tt  # from somewhere?
 
-from . import archive, job, manager, plot_util
+from . import archive, job, manager, plot_util, configuration
 
 
 def abbr_path(path, putative_prefix):
@@ -186,9 +186,12 @@ def dst_dir_report(jobs, dstdirs, width, prefix=''):
         dir_plots = plot_util.list_k32_plots(d)
         gb_free = int(plot_util.df_b(d) / plot_util.GB)
         n_plots = len(dir_plots)
+
         priority = archive.compute_priority(eldest_ph, gb_free, n_plots)
+
         row = [abbr_path(d, prefix), n_plots, gb_free,
                phases_str(phases, 5), priority]
+
         tab.add_row(row)
     tab.set_max_width(width)
     tab.set_deco(tt.Texttable.BORDER | tt.Texttable.HEADER)
@@ -214,14 +217,23 @@ def arch_dir_report(archdir_freebytes, width, prefix=''):
 
 # TODO: remove this
 def dirs_report(jobs, dir_cfg, sched_cfg, width):
+    (is_dst, dst_dir) = configuration.get_dst_directories(dir_cfg)
+    """
     reports = [
         tmp_dir_report(jobs, dir_cfg, sched_cfg, width),
         dst_dir_report(jobs, dir_cfg.dst, width),
     ]
+    
     if dir_cfg.archive is not None:
         reports.extend([
             'archive dirs free space:',
             arch_dir_report(archive.get_archdir_freebytes(dir_cfg.archive), width),
         ])
-
-    return '\n'.join(reports) + '\n'
+    """
+    # return '\n'.join(reports) + '\n'
+    return (
+        tmp_dir_report(jobs, dir_cfg, sched_cfg, width) + '\n' +
+        dst_dir_report(jobs, dst_dir, width) + '\n' +
+        'archive dirs free space:\n' +
+        arch_dir_report(archive.get_archdir_freebytes(dir_cfg.archive), width) + '\n'
+    )

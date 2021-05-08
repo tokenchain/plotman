@@ -3,6 +3,7 @@ import re
 import statistics
 
 import texttable as tt
+
 from . import plot_util
 
 
@@ -132,3 +133,4 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
     tab.set_max_width(int(columns))
     s = tab.draw()
     print(s)
+

@@ -11,30 +11,6 @@ class ConfigurationException(Exception):
     """Raised when plotman.yaml configuration is missing or malformed."""
 
 
-def get_path():
-    """Return path to where plotman.yaml configuration file should exist."""
-    return appdirs.user_config_dir("plotman") + "/plotman.yaml"
-
-
-def get_validated_configs():
-    """Return a validated instance of the PlotmanConfig dataclass with data from plotman.yaml
-    :raises ConfigurationException: Raised when plotman.yaml is either missing or malformed
-    """
-    schema = desert.schema(PlotmanConfig)
-    config_file_path = get_path()
-    try:
-        with open(config_file_path, "r") as file:
-            config_file = yaml.load(file, Loader=yaml.SafeLoader)
-            return schema.load(config_file)
-    except FileNotFoundError as e:
-        raise ConfigurationException(
-            f"No 'plotman.yaml' file exists at expected location: '{config_file_path}'. To generate "
-            f"default config file, run: 'plotman config generate'"
-        ) from e
-    except marshmallow.exceptions.ValidationError as e:
-        raise ConfigurationException(f"Config file at: '{config_file_path}' is malformed") from e
-
-
 # Data models used to deserializing/formatting plotman.yaml files.
 
 @dataclass
@@ -56,7 +32,7 @@ class TmpOverrides:
 class Directories:
     log: str
     tmp: List[str]
-    dst: List[str]
+    dst: Optional[List[str]] = None
     tmp2: Optional[str] = None
     tmp_overrides: Optional[Dict[str, TmpOverrides]] = None
     archive: Optional[Archive] = None
@@ -102,3 +78,40 @@ class PlotmanConfig:
     plotting: Plotting
     apis: Api
     user_interface: UserInterface = field(default_factory=UserInterface)
+
+
+
+
+def get_path():
+    """Return path to where plotman.yaml configuration file should exist."""
+    return appdirs.user_config_dir("plotman") + "/plotman.yaml"
+
+
+def get_dst_directories(dir_cfg: Directories):
+    """Returns either (True, <Directories.dst>) or (False, <Directories.tmp>). If Directories.dst is None,
+    Use Directories.tmp as dst directory."""
+    if dir_cfg.dst is None:
+        (False, dir_cfg.tmp)
+    else:
+        (True, dir_cfg.dst)
+
+
+def get_validated_configs():
+    """Return a validated instance of the PlotmanConfig dataclass with data from plotman.yaml
+    :raises ConfigurationException: Raised when plotman.yaml is either missing or malformed
+    """
+    schema = desert.schema(PlotmanConfig)
+    config_file_path = get_path()
+    try:
+        with open(config_file_path, "r") as file:
+            config_file = yaml.load(file, Loader=yaml.SafeLoader)
+            return schema.load(config_file)
+    except FileNotFoundError as e:
+        raise ConfigurationException(
+            f"No 'plotman.yaml' file exists at expected location: '{config_file_path}'. To generate "
+            f"default config file, run: 'plotman config generate'"
+        ) from e
+    except marshmallow.exceptions.ValidationError as e:
+        raise ConfigurationException(f"Config file at: '{config_file_path}' is malformed") from e
+
+

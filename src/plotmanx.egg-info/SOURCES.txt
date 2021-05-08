@@ -12,6 +12,7 @@ test
 tox.ini
 update.sh
 .github/workflows/ci.yml
+src/plotmanx/Farmplot.py
 src/plotmanx/__init__.py
 src/plotmanx/__main__.py
 src/plotmanx/analyzer.py

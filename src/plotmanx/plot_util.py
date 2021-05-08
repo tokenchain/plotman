@@ -40,6 +40,16 @@ def tmpdir_phases_str(tmpdir_phases_pair):
     return ('%s (%s)' % (tmpdir, phase_str))
 
 
+def getMaxFitablePlots(drive_size: int, final_plot_size: int) -> float:
+    driveSpaceBuffer = 0.05
+    amt = ((drive_size - (drive_size * driveSpaceBuffer))) / final_plot_size
+    return amt
+
+
+def availableSizeDriveForPlots(sized: int, final_plot_size: int) -> float:
+    return sized / final_plot_size
+
+
 def split_path_prefix(items):
     if not items:
         return ('', [])

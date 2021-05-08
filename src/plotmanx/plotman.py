@@ -14,6 +14,7 @@ from plotmanx.configuration import ConfigurationException
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
+from .Farmplot import FarmPlot
 from .api import apiOpen
 from .job import Job
 
@@ -31,21 +32,13 @@ class PlotmanArgParser:
         sp = parser.add_subparsers(dest='cmd')
 
         sp.add_parser('version', help='print the version')
-
         sp.add_parser('status', help='show current plotting status')
-
         sp.add_parser('dirs', help='show directories info')
-
         sp.add_parser('interactive', help='run interactive control/monitoring mode')
-
         sp.add_parser('dsched', help='print destination dir schedule')
-
         sp.add_parser('plot', help='run plotting loop')
-
         sp.add_parser('api', help='open api port for external applications')
-
         sp.add_parser('archive', help='move completed plots to farming location')
-
         p_config = sp.add_parser('config', help='display or generate plotman.yaml configuration')
         sp_config = p_config.add_subparsers(dest='config_subcommand')
         sp_config.add_parser('generate', help='generate a default plotman.yaml file and print path')
@@ -197,8 +190,10 @@ def main():
     # Stay alive, spawning plot jobs
     #
     if args.cmd == 'plot':
+        farm = FarmPlot(cfg)
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             executor.submit(plotting, cfg)
+            executor.submit(farm.checking)
 
     #
     # Analysis of completed jobs
