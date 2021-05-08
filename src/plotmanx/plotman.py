@@ -14,7 +14,7 @@ from plotmanx.configuration import ConfigurationException
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
-from .Farmplot import FarmPlot
+from .farmplot import FarmPlot
 from .api import apiOpen
 from .job import Job
 
