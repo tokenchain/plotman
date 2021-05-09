@@ -112,9 +112,6 @@ def plotting(cfg: PlotmanConfig):
 
             time.sleep(cfg.scheduling.polling_time_s)
 
-        except ConfigurationException as te:
-            print('got ConfigurationException from io', te)
-            continue
         except ValidationError as te:
             print('got ConfigurationException from io', te)
             continue
