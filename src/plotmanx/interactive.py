@@ -115,7 +115,7 @@ def curses_main_v2(stdscr):
             last_refresh = datetime.datetime.now()
             jobs = Job.get_running_jobs(cfg.directories.log)
             (a, b) = manager.getygStaggerTime(
-                cfg.directories, cfg.scheduling, cfg.plotting
+                jobs, cfg.scheduling
             )
             if plotting_active and a < b:
                 for i in range(cfg.scheduling.parallel):

@@ -37,6 +37,8 @@ scheduling:
         global_max_jobs: 90
         global_stagger_m: 20
         polling_time_s: 30
+        parallel: 4
+        
 plotting:
         k: 32
         e: True              # Use -e plotting option

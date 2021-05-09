@@ -93,15 +93,22 @@ def plotting(cfg: any):
     print('starting plot loop')
     while True:
         try:
-            for i in range(cfg.scheduling.parallel):
 
-                (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)
-                ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
+            jobs = Job.get_running_jobs(cfg.directories.log)
+            (a, b) = manager.getygStaggerTime(
+                jobs, cfg.scheduling
+            )
 
-                if wait_reason:
-                    print('> %s, %s' % (ts, wait_reason))
-                else:
-                    print('start plot > %s' % ts)
+            if a < b:
+                for i in range(cfg.scheduling.parallel):
+
+                    (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)
+                    ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
+
+                    if wait_reason:
+                        print('> %s, %s' % (ts, wait_reason))
+                    else:
+                        print('start plot > %s' % ts)
 
             time.sleep(cfg.scheduling.polling_time_s)
 

@@ -28,6 +28,7 @@ def is_plotting_cmdline(cmdline):
             and 'create' == cmdline[3]
     )
 
+
 # This is a cmdline argument fix for https://github.com/ericaltendorf/plotman/issues/41
 def cmdline_argfix(cmdline):
     known_keys = 'krbut2dnea'
@@ -75,7 +76,8 @@ class Job:
 
     last_updated_time_in_min = 0
 
-    def get_running_jobs(logroot, cached_jobs=()):
+    @staticmethod
+    def get_running_jobs(logroot, cached_jobs=()) -> list:
         '''Return a list of running plot jobs.  If a cache of preexisting jobs is provided,
            reuse those previous jobs without updating their information.  Always look for
            new jobs not already in the cache.'''

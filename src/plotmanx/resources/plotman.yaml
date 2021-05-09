@@ -90,6 +90,8 @@ scheduling:
         tmpdir_stagger_phase_minor: 10
         # Optional: default is 1
         tmpdir_stagger_phase_limit: 10
+        # That is the working group
+        parallel: 8
 
         # Don't run more than this many jobs at a time on a single temp dir.
         tmpdir_max_jobs: 10
