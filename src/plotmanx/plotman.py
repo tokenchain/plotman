@@ -99,7 +99,7 @@ def plotting(cfg: PlotmanConfig):
                 jobs, cfg.scheduling
             )
 
-            if a < b or len(jobs) == 0:
+            if a > b or len(jobs) == 0:
                 for i in range(cfg.scheduling.parallel):
 
                     (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)

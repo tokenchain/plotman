@@ -8,6 +8,7 @@ pyyaml
 texttable
 flask
 flask-restplus
+prometheus-client
 
 [dev]
 check-manifest
