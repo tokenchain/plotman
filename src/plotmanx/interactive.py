@@ -114,23 +114,26 @@ def curses_main_v2(stdscr):
         else:
             last_refresh = datetime.datetime.now()
             jobs = Job.get_running_jobs(cfg.directories.log)
-
-            if plotting_active:
-                (started, msg) = manager.maybe_start_new_plot(
-                    cfg.directories, cfg.scheduling, cfg.plotting
-                )
-                if (started):
-                    if aging_reason is not None:
-                        log.log(aging_reason)
-                        aging_reason = None
-                    log.log(msg)
-                    plotting_status = '<just started job>'
-                    jobs = Job.get_running_jobs(cfg.directories.log, cached_jobs=jobs)
-                else:
-                    # If a plot is delayed for any reason other than stagger, log it
-                    if msg.find("stagger") < 0:
-                        aging_reason = msg
-                    plotting_status = msg
+            (a, b) = manager.getygStaggerTime(
+                cfg.directories, cfg.scheduling, cfg.plotting
+            )
+            if plotting_active and a < b:
+                for i in range(cfg.scheduling.parallel):
+                    (started, msg) = manager.maybe_start_new_plot(
+                        cfg.directories, cfg.scheduling, cfg.plotting
+                    )
+                    if started:
+                        if aging_reason is not None:
+                            log.log(aging_reason)
+                            aging_reason = None
+                        log.log(msg)
+                        plotting_status = '<just started job>'
+                        jobs = Job.get_running_jobs(cfg.directories.log, cached_jobs=jobs)
+                    else:
+                        # If a plot is delayed for any reason other than stagger, log it
+                        if msg.find("stagger") < 0:
+                            aging_reason = msg
+                        plotting_status = msg
 
             if archiving_configured:
                 if archiving_active:
@@ -341,6 +344,7 @@ def curses_main_v2(stdscr):
             pressed_key = key
 
 
+"""
 def curses_main_v1(stdscr):
     log = Log()
 
@@ -390,15 +394,16 @@ def curses_main_v1(stdscr):
             jobs = Job.get_running_jobs(cfg.directories.log)
 
             if plotting_active:
-                (started, msg) = manager.maybe_start_new_plot(
-                    cfg.directories, cfg.scheduling, cfg.plotting
-                )
-                if (started):
-                    log.log(msg)
-                    plotting_status = '<just started job>'
-                    jobs = Job.get_running_jobs(cfg.directories.log, cached_jobs=jobs)
-                else:
-                    plotting_status = msg
+                for i in range(cfg.scheduling.parallel):
+                    (started, msg) = manager.maybe_start_new_plot(
+                        cfg.directories, cfg.scheduling, cfg.plotting
+                    )
+                    if (started):
+                        log.log(msg)
+                        plotting_status = '<just started job>'
+                        jobs = Job.get_running_jobs(cfg.directories.log, cached_jobs=jobs)
+                    else:
+                        plotting_status = msg
 
             if archiving_configured:
                 if archiving_active:
@@ -623,6 +628,7 @@ def curses_main_v1(stdscr):
             break
         else:
             pressed_key = key
+"""
 
 
 def run_interactive():

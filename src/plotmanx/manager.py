@@ -1,15 +1,16 @@
 import operator
 import os
-import random
 import subprocess
 
 import pendulum
 import psutil
 
-# Plotman libraries
-from . import job, configuration
-
+from . import job
 # Constants
+from .configuration import Scheduling, Plotting, Directories
+
+# Plotman libraries
+
 MIN = 60  # Seconds
 HR = 3600  # Seconds
 MAX_PLOT_SIZE = 332  # Minimum gb required for k32 plot
@@ -41,7 +42,7 @@ def phases_permit_new_job(phases, d, sched_cfg, dir_cfg):
        with existing jobs in the provided phases.'''
 
     # 当前磁盘剩余空间小于350g不新增
-    #if psutil.disk_usage(d).free / 1024 / 1024 / 1024 < 350:
+    # if psutil.disk_usage(d).free / 1024 / 1024 / 1024 < 350:
     #    return False
 
     # Filter unknown-phase jobs
@@ -97,8 +98,14 @@ def select_jobs_by_partial_id(jobs, partial_id):
     return selected
 
 
-def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
+def getygStaggerTime(jobs, sched_cfg: Scheduling) -> any:
+    youngest_job_age = min(jobs, key=job.Job.get_time_wall).get_time_wall() if jobs else MAX_AGE
+    global_stagger = int(sched_cfg.global_stagger_m * MIN)
 
+    return (youngest_job_age, global_stagger)
+
+
+def maybe_start_new_plot(dir_cfg: Directories, sched_cfg: Scheduling, plotting_cfg: Plotting):
     if psutil.cpu_percent(interval=10) > 90:
         return (False, 'cpu busy')
 
@@ -106,10 +113,9 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
 
     wait_reason = None  # If we don't start a job this iteration, this says why.
 
-    youngest_job_age = min(jobs, key=job.Job.get_time_wall).get_time_wall() if jobs else MAX_AGE
-    global_stagger = int(sched_cfg.global_stagger_m * MIN)
+    (youngest_job_age, global_stagger) = getygStaggerTime(jobs, sched_cfg)
 
-    if youngest_job_age < global_stagger:
+    if youngest_job_age < global_stagger and sched_cfg.parallel <= 1:
         wait_reason = 'stagger (%ds/%ds)' % (youngest_job_age, global_stagger)
 
     elif len(jobs) >= sched_cfg.global_max_jobs:
@@ -130,21 +136,22 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             # Plot to oldest tmpdir.
             tmpdir = max(rankable, key=operator.itemgetter(1))[0]
             # Select the dst dir least recently selected
+
+            """ 
             (is_dst, dst_dir) = configuration.get_dst_directories(dir_cfg)
-
-            dstdir = ''
-
-            if is_dst:
-
-                dir2ph = {d: ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
-                          if d in dst_dir}
-
-                unused_dirs = [d for d in dst_dir if d not in dir2ph.keys()]
-
-                if len(unused_dirs) > 0:
-                    dstdir = random.choice(unused_dirs)
-                else:
-                    dstdir = tmpdir
+               dstdir = ''
+               if is_dst:
+    
+                    dir2ph = {d: ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
+                              if d in dst_dir}
+    
+                    unused_dirs = [d for d in dst_dir if d not in dir2ph.keys()]
+    
+                    if len(unused_dirs) > 0:
+                        dstdir = random.choice(unused_dirs)
+                    else:
+                        dstdir = tmpdir
+            """
 
             logfile = os.path.join(
                 dir_cfg.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'

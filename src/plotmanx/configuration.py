@@ -44,6 +44,7 @@ class Scheduling:
     global_stagger_m: int
     polling_time_s: int
     tmpdir_max_jobs: int
+    parallel: Optional[int] = 8
     tmpdir_stagger_phase_major: int
     tmpdir_stagger_phase_minor: int
     tmpdir_stagger_phase_limit: int = 1  # If not explicit, "tmpdir_stagger_phase_limit" will default to 1

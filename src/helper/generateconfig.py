@@ -1,6 +1,5 @@
 # !/usr/bin/env python3
 import os
-from string import Template
 
 servers = [61, 62, 63, 64, 66, 67, 68, 69, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 storage1 = [236, 237, 238, 239, 240, 241, 242, 243]
@@ -9,7 +8,7 @@ dst = "/Users/hesdx/Documents/ipfs/deplotplot/workers"
 
 c = 0
 
-t = """
+tyaml = """
 
 user_interface:
         use_stty_size: True
@@ -17,12 +16,12 @@ directories:
         log: /home/ipant/.chia/mainnet
         tmp:
                 - /mnt/local/tmp
+        tmp2: /mnt/local/tmp
         tmp_overrides:
                 "/mnt/local/tmp":
                         tmpdir_max_jobs: 30
         dst:
-                - /mnt/nfs/{name1}/chiaFinalData
-                - /mnt/nfs/{name2}/chiaFinalData
+{list}
         archive:
                 #rsyncd_module: plots
                 #rsyncd_path: /plots
@@ -53,23 +52,82 @@ apis:
         api_polling_throttle_s: 5
         """
 
+mjob = """
+
+
+if [ ! -d "{target}" ]; then
+    sudo mkdir -p {target}
+    echo "mount drive 192.168.10.{worker_id}"
+    sudo mount -t nfs 192.168.10.{worker_id}:/minerdata {target} -o nolock
+fi
+
+"""
+
 
 def filename(k) -> str:
     if k < len(storage1):
         u = storage1[k]
         return "storage{}".format(u)
     else:
-        p = storage2[k - len(storage1)]
-        return "ipant{}".format(p)
+        if k < len(storage2):
+            p = storage2[k - len(storage1)]
+            return "ipant{}".format(p)
+        else:
+            p1 = storage2[k - len(storage1) - len(storage2)]
+            return "ipant{}".format(p1)
+
+def workerID(k) -> str:
+    if k < len(storage1):
+        u = storage1[k]
+        return u
+    else:
+        if k < len(storage2):
+            p = storage2[k - len(storage1)]
+            return p
+        else:
+            p1 = storage2[k - len(storage1) - len(storage2)]
+            return p1
+
+
+def appendx(d) -> str:
+    return "                - /mnt/nfs/{}/chiaFinalData".format(d)
+
+
+def nameFile(formatc, workerID: int) -> any:
+    km = formatc.format(workerID)
+    file = os.path.join(dst, km)
+    return file
+
+
+def mountdisk(d) -> str:
+    return "/mnt/nfs/{}".format(d)
 
 
 for i in servers:
-    FileName = "worker{}.yaml".format(i)
-    file = os.path.join(dst, FileName)
-    disk1It = filename(c * 2)
-    disk2It = filename(c * 2 + 1)
-    s = t.format(name1=disk1It, name2=disk2It)
-    with open(file, 'w') as f:
+    k = list()
+    id1 = c * 3
+    id2 = c * 3 + 1
+    id3 = c * 3 + 2
+    d1 = filename(id1)
+    d2 = filename(id2)
+    d3 = filename(id2)
+
+    k.append(appendx(d1))
+    k.append(appendx(d2))
+    k.append(appendx(d3))
+
+    s = tyaml.format(list="\n".join(k))
+    print("W{} -> worker{} -> {} {} {}".format(c, i, d1, d2, d3))
+
+    with open(nameFile("worker{}.yaml", i), 'w') as f:
         f.write(s)
         f.close()
+
+    with open(nameFile("workerNetdiskMount{}.sh", i), 'w') as f:
+        f.write("#!/bin/bash\n")
+        f.write(mjob.format(target=mountdisk(d1), worker_id=workerID(id1)))
+        f.write(mjob.format(target=mountdisk(d2), worker_id=workerID(id2)))
+        f.write(mjob.format(target=mountdisk(d3), worker_id=workerID(id3)))
+        f.close()
+
     c += 1

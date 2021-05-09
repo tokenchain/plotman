@@ -14,8 +14,8 @@ from plotmanx.configuration import ConfigurationException
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
-from .farmplot import FarmPlot
 from .api import apiOpen
+from .farmplot import FarmPlot
 from .job import Job
 
 
@@ -93,11 +93,15 @@ def plotting(cfg: any):
     print('starting plot loop')
     while True:
         try:
-            (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)
-            # TODO: report this via a channel that can be polled on demand, so we don't spam the console
-            if wait_reason:
+            for i in range(cfg.scheduling.parallel):
+
+                (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)
                 ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
-                print('...%s, s, %s' % (ts, wait_reason))
+
+                if wait_reason:
+                    print('> %s, %s' % (ts, wait_reason))
+                else:
+                    print('start plot > %s' % ts)
 
             time.sleep(cfg.scheduling.polling_time_s)
 
@@ -120,8 +124,8 @@ def plotting(cfg: any):
             print('got IOError from io', io)
             continue
 
-
     print('exit from error unknown...')
+
 
 def archivePlots(cfg: any):
     print('...starting archive loop')
