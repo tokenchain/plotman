@@ -119,7 +119,7 @@ for i in servers:
     k.append(appendx(d3))
 
     s = tyaml.format(list="\n".join(k))
-    print("W{} -> worker{} -> {} {} {}".format(c, i, d1, d2, d3))
+    print("W{} -> worker{} -> {} {} {}".format(c+1, i, d1, d2, d3))
 
     with open(nameFile("worker{}.yaml", i), 'w') as f:
         f.write(s)
