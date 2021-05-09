@@ -1,4 +1,15 @@
+#!/usr/bin/python
+#
 import os
+
+
+
+import time
+from . import configuration, job, reporting
+from .job import Job
+from prometheus_client import start_http_server
+from prometheus_client.core import GaugeMetricFamily, REGISTRY
+
 
 from flask import Flask, jsonify
 from plotmanx.reporting import abbr_path, phase_str
@@ -43,3 +54,20 @@ def apiOpen(cfg: PlotmanConfig):
 
 
     appc.run(host="0.0.0.0", port=cfg.apis.port)
+
+
+class PlotmanCollector:
+
+    def collect(self):
+        cfg = configuration.get_validated_configs()
+        jobs = Job.get_running_jobs(cfg.directories.log)
+
+        count = len(sorted(jobs, key=job.Job.get_time_wall))
+        yield GaugeMetricFamily("plotman_jobs_count", "Number of plotting jobs running", value=count)
+
+
+if __name__ == "__main__":
+    start_http_server(8001)
+    REGISTRY.register(PlotmanCollector())
+    while True:
+        time.sleep(1)
