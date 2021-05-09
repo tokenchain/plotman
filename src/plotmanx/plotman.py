@@ -10,11 +10,11 @@ from shutil import copyfile
 
 # Plotman libraries
 from marshmallow import ValidationError
-from plotmanx.configuration import ConfigurationException
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
 from .api import apiOpen
+from .configuration import PlotmanConfig, ConfigurationException
 from .farmplot import FarmPlot
 from .job import Job
 
@@ -89,7 +89,7 @@ def get_term_width():
     return columns
 
 
-def plotting(cfg: any):
+def plotting(cfg: PlotmanConfig):
     print('starting plot loop')
     while True:
         try:
