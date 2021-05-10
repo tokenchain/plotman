@@ -19,7 +19,7 @@ directories:
         tmp2: /mnt/local/tmp
         tmp_overrides:
                 "/mnt/local/tmp":
-                        tmpdir_max_jobs: 30
+                        tmpdir_max_jobs: 25
         dst:
 {list}
         archive:
