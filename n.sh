@@ -84,7 +84,14 @@ clean_repo() {
   # echo "ready and install it again.."
   # sudo pip3 install --proxy 127.0.0.1:1087 tronpytool==$VERSION
 }
-
+buildcopyop(){
+  cd copyop
+  env GOOS=linux GOARCH=amd64 go build -o copyfil copyfil.go
+}
+installLocal(){
+  cd copyop
+  go install copyfil.go
+}
 testup(){
   python3 -m pytest
 }
