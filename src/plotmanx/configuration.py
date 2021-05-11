@@ -49,6 +49,7 @@ class Scheduling:
     tmpdir_stagger_phase_limit: int = 1  # If not explicit, "tmpdir_stagger_phase_limit" will default to 1
     parallel: int = 8
 
+
 @dataclass
 class Plotting:
     k: int
@@ -80,11 +81,14 @@ class PlotmanConfig:
     user_interface: UserInterface = field(default_factory=UserInterface)
 
 
-
-
 def get_path():
     """Return path to where plotman.yaml configuration file should exist."""
     return appdirs.user_config_dir("plotman") + "/plotman.yaml"
+
+
+def get_log_path():
+    """Return path to where plotman.yaml configuration file should exist."""
+    return appdirs.user_config_dir("plotman") + "/nfs.log"
 
 
 def get_dst_directories(dir_cfg: Directories):
@@ -113,5 +117,3 @@ def get_validated_configs():
         ) from e
     except marshmallow.exceptions.ValidationError as e:
         raise ConfigurationException(f"Config file at: '{config_file_path}' is malformed") from e
-
-

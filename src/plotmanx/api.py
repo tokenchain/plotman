@@ -1,21 +1,17 @@
 #!/usr/bin/python
 #
 import os
-
-
-
 import time
-from . import configuration, job, reporting
-from .job import Job
-from prometheus_client import start_http_server
-from prometheus_client.core import GaugeMetricFamily, REGISTRY
-
 
 from flask import Flask, jsonify
 from plotmanx.reporting import abbr_path, phase_str
+from prometheus_client import start_http_server
+from prometheus_client.core import GaugeMetricFamily, REGISTRY
 
+from . import configuration
 from . import job, plot_util
 from .configuration import PlotmanConfig
+from .job import Job
 
 
 def jsondata(jobs, tmp_prefix='', dst_prefix=''):
@@ -51,8 +47,6 @@ def apiOpen(cfg: PlotmanConfig):
     appc.add_url_rule('status', '/status')
     appc.view_functions['status'] = status
     print("api port %s is now listening".format(cfg.apis.port))
-
-
     appc.run(host="0.0.0.0", port=cfg.apis.port)
 
 
@@ -61,7 +55,6 @@ class PlotmanCollector:
     def collect(self):
         cfg = configuration.get_validated_configs()
         jobs = Job.get_running_jobs(cfg.directories.log)
-
         count = len(sorted(jobs, key=job.Job.get_time_wall))
         yield GaugeMetricFamily("plotman_jobs_count", "Number of plotting jobs running", value=count)
 

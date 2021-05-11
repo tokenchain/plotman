@@ -59,6 +59,8 @@ clean_repo() {
   VERSION=$(cat VERSION)
   increment_version $VERSION >version
   VERSION=$(cat VERSION)
+  sudo rm copyop/temp/*.plot
+  sudo rm copyop/dst/*.plot
   sudo rm -rf build
   sudo rm -rf src/plotmanx.egg-info
   sudo rm -rf dist
@@ -84,14 +86,14 @@ clean_repo() {
   # echo "ready and install it again.."
   # sudo pip3 install --proxy 127.0.0.1:1087 tronpytool==$VERSION
 }
+
 buildcopyop(){
   cd copyop
-  env GOOS=linux GOARCH=amd64 go build -o copyfil copyfil.go
+  env GOOS=linux GOARCH=amd64 go build -o copyfil mover.go
+  zip copyfilx.zip copyfil 
 }
-installLocal(){
-  cd copyop
-  go install copyfil.go
-}
+
+
 testup(){
   python3 -m pytest
 }

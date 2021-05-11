@@ -14,7 +14,7 @@ from marshmallow import ValidationError
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
 from .api import apiOpen
-from .configuration import PlotmanConfig, ConfigurationException
+from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
 from .job import Job
 
@@ -38,6 +38,7 @@ class PlotmanArgParser:
         sp.add_parser('dsched', help='print destination dir schedule')
         sp.add_parser('plot', help='run plotting loop')
         sp.add_parser('api', help='open api port for external applications')
+        sp.add_parser('nfs', help='using go version temp file archive')
         sp.add_parser('archive', help='move completed plots to farming location')
         p_config = sp.add_parser('config', help='display or generate plotman.yaml configuration')
         sp_config = p_config.add_subparsers(dest='config_subcommand')
@@ -141,7 +142,7 @@ def archivePlots(cfg: any):
             time.sleep(60)
             jobs = Job.get_running_jobs(cfg.directories.log)
         firstit = False
-        archiving_status, log_message = archive.spawn_archive_process(cfg.directories, jobs)
+        archiving_status, log_message = archive.spawn_archive_process_rsync(cfg.directories, jobs)
         if log_message:
             print('%s, %s' % (archiving_status, log_message))
 
@@ -198,10 +199,8 @@ def main():
     # Stay alive, spawning plot jobs
     #
     if args.cmd == 'plot':
-        farm = FarmPlot(cfg)
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             executor.submit(plotting, cfg)
-            executor.submit(farm.checking)
 
     #
     # Analysis of completed jobs
@@ -233,6 +232,10 @@ def main():
         elif args.cmd == 'archive':
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
                 executor.submit(archivePlots, cfg)
+
+        elif args.cmd == 'nfs':
+            farm = FarmPlot(cfg)
+            farm.start_copyplot_spawn()
 
         # Debugging: show the destination drive usage schedule
         elif args.cmd == 'dsched':
@@ -292,6 +295,7 @@ def main():
                 elif args.cmd == 'suspend':
                     print('Suspending ' + job.plot_id)
                     job.suspend()
+
                 elif args.cmd == 'resume':
                     print('Resuming ' + job.plot_id)
                     job.resume()

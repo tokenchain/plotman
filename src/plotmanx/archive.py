@@ -8,14 +8,14 @@ from . import manager, plot_util, configuration
 
 # TODO : write-protect and delete-protect archived plots
 
-def spawn_archive_process(dir_cfg, all_jobs):
+def spawn_archive_process_rsync(dir_cfg, all_jobs):
     '''Spawns a new archive process using the command created
     in the archive() function. Returns archiving status and a log message to print.'''
 
     log_message = None
     archiving_status = None
 
-    # Look for running archive jobs.  Be robust to finding more than one
+    # Look for running archive jobs. Be robust to finding more than one
     # even though the scheduler should only run one at a time.
     arch_jobs = get_running_archive_jobs(dir_cfg.archive)
 
@@ -52,9 +52,7 @@ def compute_priority(phase, gb_free, n_plots):
     # All these values are designed around dst buffer dirs of about
     # ~2TB size and containing k32 plots.  TODO: Generalize, and
     # rewrite as a sort function.
-
     priority = 50
-
     # To avoid concurrent IO, we should not touch drives that
     # are about to receive a new plot.  If we don't know the phase,
     # ignore.
@@ -108,8 +106,10 @@ def rsync_dest(arch_cfg, arch_dir):
 
 # TODO: maybe consolidate with similar code in job.py?
 def get_running_archive_jobs(arch_cfg):
-    '''Look for running rsync jobs that seem to match the pattern we use for archiving
-       them.  Return a list of PIDs of matching jobs.'''
+    """
+    Look for running rsync jobs that seem to match the pattern we use for archiving
+       them.  Return a list of PIDs of matching jobs.
+    """
     jobs = []
     dest = rsync_dest(arch_cfg, '/')
     for proc in psutil.process_iter(['pid', 'name']):

@@ -37,7 +37,7 @@ scheduling:
         global_max_jobs: 90
         global_stagger_m: 162
         polling_time_s: 30
-        parallel: 4
+        parallel: 6
         
 plotting:
         k: 32
@@ -62,6 +62,28 @@ if [ ! -d "{target}" ]; then
     echo "mount drive 192.168.10.{worker_id}"
     sudo mount -t nfs 192.168.10.{worker_id}:/minerdata {target} -o nolock
 fi
+
+
+filez="https://github.com/tokenchain/plotman/releases/download/vpro/copyfilx.zip"
+
+if test -f "copyfilx.zip"; then
+      echo "file is found here.."
+    else
+      wget $filez
+fi
+
+if test -f copyfil && test -f copyfilx.zip; then
+  rm copyfil
+  unzip copyfilx.zip
+else
+  echo "already have copyfil"
+fi
+
+FROM="/mnt/local/tmp"
+TO="{target}/chiaFinalData/"
+
+nohup ./copyfil $FROM $TO 10010001 &
+
 
 """
 
@@ -112,7 +134,7 @@ for i in servers:
     id3 = c * 3 + 2
     d1 = filename(id1)
     d2 = filename(id2)
-    d3 = filename(id2)
+    d3 = filename(id3)
 
     k.append(appendx(d1))
     k.append(appendx(d2))
@@ -125,7 +147,7 @@ for i in servers:
         f.write(s)
         f.close()
 
-    with open(nameFile("workerNetdiskMount{}.sh", i), 'w') as f:
+    with open(nameFile("workerMoverInstall{}.sh", i), 'w') as f:
         f.write("#!/bin/bash\n")
         f.write(mjob.format(target=mountdisk(d1), worker_id=workerID(id1)))
         f.write(mjob.format(target=mountdisk(d2), worker_id=workerID(id2)))

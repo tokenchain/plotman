@@ -6,6 +6,7 @@ README.md
 VERSION
 n.sh
 pyproject.toml
+runbuild.sh
 setup.cfg
 setup.py
 test

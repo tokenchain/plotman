@@ -1,3 +1,4 @@
 #!/bin/sh
 . ./n.sh
-installLocal
+#installLocal
+buildcopyop
