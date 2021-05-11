@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -83,15 +84,6 @@ func copy(src, dst string, BUFFERSIZE int64) error {
 	return err
 }
 
-func removefil(source string, w *sync.WaitGroup) {
-	defer w.Done()
-	err := os.Remove(source)
-	if err != nil {
-		Logf("Error from removing file: %s %q\n", source, err)
-		return
-	}
-}
-
 func blocktransfer(source, destination string) {
 
 	BUFFERSIZE, err := strconv.ParseInt(os.Args[3], 10, 64)
@@ -112,6 +104,49 @@ func blocktransfer(source, destination string) {
 	}
 }
 
+func mark(sourceDir, filename, destinationDir string, lock bool) {
+	store, err := pkg.SKVOpen(fmt.Sprintf("%s/writeLock.db", sourceDir))
+
+	if err != nil {
+		Logf("store 1 err %v", err)
+		return
+	}
+	defer store.Close()
+	if lock {
+		// put: encodes value with gob and updates the boltdb
+		err = store.Put(filename, destinationDir)
+	} else {
+		// delete: seeks in boltdb and deletes the record
+		err = store.Delete(filename)
+	}
+	if err != nil {
+		Logf("store err %v", err)
+		return
+	}
+}
+
+func isLock(sourceDir, filename string) bool {
+	var info string
+	store, err := pkg.SKVOpen(fmt.Sprintf("%s/writeLock.db", sourceDir))
+	if err != nil {
+		Log("check 1 false")
+		return false
+	}
+	defer store.Close()
+	// get: fetches from boltdb and does gob decode
+	err = store.Get(filename, &info)
+	if err == pkg.ErrNotFound {
+		Log("check 2 false not found")
+		return false
+	}
+
+	if &info != nil {
+		return true
+	} else {
+		Log("check 3 false no info")
+		return false
+	}
+}
 func Log(s string) {
 	var optionalLogFile = ""
 
@@ -160,18 +195,31 @@ func main() {
 			Logf("Found plot files %d", len(matches))
 
 			if len(matches) > 0 {
-				match := matches[0]
+				s := rand.NewSource(time.Now().Unix())
+				r := rand.New(s) // initialize local pseudorandom generator
+				match := matches[r.Intn(len(matches))]
+				if isLock(sourceDir, match) {
+					continue
+				}
 				fileinfo, _ := os.Stat(match)
 				if fileinfo.Mode().IsRegular() {
 					name := fileinfo.Name()
 					des := fmt.Sprintf("%s%s", destinationDir, name)
-
 					usage := pkg.NewDiskUsage(destinationDir)
 
 					if usage.Free() > uint64(fileinfo.Size()) {
+						mark(sourceDir, match, des, true)
 						blocktransfer(match, des)
 						wg.Add(1)
-						go removefil(match, &wg)
+						go func() {
+							defer wg.Done()
+							defer mark(sourceDir, match, des, false)
+							err := os.Remove(match)
+							if err != nil {
+								Logf("Error from removing file: %s %q\n", match, err)
+								return
+							}
+						}()
 					} else {
 						Log("there is not enough space")
 						Logf("Free:", usage.Free()/(KB*KB))

@@ -13,6 +13,12 @@ test
 tox.ini
 update.sh
 .github/workflows/ci.yml
+copyop/copyfilz.zip
+copyop/go.mod
+copyop/mover.go
+copyop/runbuild.sh
+copyop/pkg/calle.go
+copyop/temp/test.sh
 src/helper/generateconfig.py
 src/plotmanx/__init__.py
 src/plotmanx/__main__.py
