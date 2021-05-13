@@ -89,8 +89,8 @@ clean_repo() {
 
 buildcopyop(){
   cd copyop
-  env GOOS=linux GOARCH=amd64 go build -o copyfil mover.go
-  zip copyfilx.zip copyfil 
+  env GOOS=linux GOARCH=amd64 go build -o plmo mover.go
+  zip plmo.zip plmo 
 }
 
 

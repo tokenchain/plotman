@@ -1,5 +1,8 @@
 # !/usr/bin/env python3
+
 import os
+
+import xlsxwriter
 
 servers = [61, 62, 63, 64, 66, 67, 68, 69, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 storage1 = [236, 237, 238, 239, 240, 241, 242, 243]
@@ -56,7 +59,6 @@ apis:
 
 mjob = """
 
-
 if [ ! -d "{target}" ]; then
     sudo mkdir -p {target}
     echo "mount drive 192.168.10.{worker_id}"
@@ -64,27 +66,16 @@ if [ ! -d "{target}" ]; then
 fi
 
 
-filez="https://github.com/tokenchain/plotman/releases/download/vpro/copyfilx.zip"
+"""
+ransfar = """
+nohup ./plmo /mnt/local/tmp /mnt/nfs/{foldername}/chiaFinalData/ 10010001 &
+"""
 
-if test -f "copyfilx.zip"; then
-      echo "file is found here.."
-    else
-      wget $filez
-fi
+upgrade = """
 
-if test -f copyfil && test -f copyfilx.zip; then
-  rm copyfil
-  unzip copyfilx.zip
-else
-  echo "already have copyfil"
-fi
-
-FROM="/mnt/local/tmp"
-TO="{target}/chiaFinalData/"
-
-nohup ./copyfil $FROM $TO 10010001 &
-
-
+cd ~/chia-blockchain/
+wget https://github.com/tokenchain/plotman/releases/download/evo/plmoflex.zip && unzip -o plmoflex.zip 
+rm plmoflex.zip 
 """
 
 
@@ -99,6 +90,7 @@ def filename(k) -> str:
         else:
             p1 = storage2[k - len(storage1) - len(storage2)]
             return "ipant{}".format(p1)
+
 
 def workerID(k) -> str:
     if k < len(storage1):
@@ -127,6 +119,40 @@ def mountdisk(d) -> str:
     return "/mnt/nfs/{}".format(d)
 
 
+class ExcelSheetGen:
+    def __init__(self, basepath: str):
+        # Create a workbook and add a worksheet.
+        self.workbook = xlsxwriter.Workbook(os.path.join(basepath, 'chiaNodes.xlsx'))
+        self.worksheet = self.workbook.add_worksheet()
+
+        # Start from the first cell. Rows and columns are zero indexed.
+        self.row = 1
+        self.col = 0
+        self.worksheet.write(self.row, self.col, "connect cmd")
+        self.worksheet.write(self.row, self.col + 1, "worker IP")
+        self.worksheet.write(self.row, self.col + 2, "path NFS")
+        self.worksheet.write(self.row, self.col + 3, "path NFS")
+        self.worksheet.write(self.row, self.col + 4, "path NFS")
+        self.row += 1
+
+    def dataEnter(self, wid, workerId, folder1, folder2, folder3):
+        # Some data we want to write to the worksheet.
+        self.worksheet.write(self.row, self.col, wid)
+        self.worksheet.write(self.row, self.col + 1, workerId)
+        self.worksheet.write(self.row, self.col + 2, folder1)
+        self.worksheet.write(self.row, self.col + 3, folder2)
+        self.worksheet.write(self.row, self.col + 4, folder3)
+        self.row += 1
+
+    def endExcel(self):
+        # Write a total using a formula.
+        # self.worksheet.write(row, 0, 'Total')
+        # self.worksheet.write(row, 1, '=SUM(B1:B4)')
+        self.workbook.close()
+
+
+book = ExcelSheetGen(dst)
+
 for i in servers:
     k = list()
     id1 = c * 3
@@ -141,7 +167,7 @@ for i in servers:
     k.append(appendx(d3))
 
     s = tyaml.format(list="\n".join(k))
-    print("W{} -> worker{} -> {} {} {}".format(c+1, i, d1, d2, d3))
+    print("W{} -> worker{} -> {} {} {}".format(c + 1, i, d1, d2, d3))
 
     with open(nameFile("worker{}.yaml", i), 'w') as f:
         f.write(s)
@@ -152,6 +178,14 @@ for i in servers:
         f.write(mjob.format(target=mountdisk(d1), worker_id=workerID(id1)))
         f.write(mjob.format(target=mountdisk(d2), worker_id=workerID(id2)))
         f.write(mjob.format(target=mountdisk(d3), worker_id=workerID(id3)))
+        f.write(ransfar.format(foldername=filename(id1)))
+        f.write(ransfar.format(foldername=filename(id2)))
+        f.write(ransfar.format(foldername=filename(id3)))
+        f.write(upgrade)
         f.close()
 
+    book.dataEnter("W{}".format(c + 1), i, d1, d2, d3)
+    print("excel new line")
+
     c += 1
+book.endExcel()

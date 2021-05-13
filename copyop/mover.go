@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -76,8 +77,8 @@ func copy(src, dst string, BUFFERSIZE int64) error {
 		if (int64(downb)-int64(buffin)) > (BUFFERSIZE/5) && downb > 10000 {
 			buffin = downb
 			percent := float64(downb) / float64(total) * 100
-			//nowcc := big.NewFloat(percent).SetPrec(3).String()
-			Logf("Now: %d %.2f\n", downb, percent)
+			nowcc := big.NewFloat(percent).SetPrec(3).String()
+			Logf("Now:|%6d|%6s %%|\n", downb, nowcc)
 		}
 
 	}
@@ -147,6 +148,7 @@ func isLock(sourceDir, filename string) bool {
 		return false
 	}
 }
+
 func Log(s string) {
 	var optionalLogFile = ""
 
@@ -166,8 +168,9 @@ func Log(s string) {
 	log.SetOutput(wrt)
 	log.Println(fmt.Sprintf("%s", s))
 }
-func Logf(format string, a ...interface{}) {
-	Log(fmt.Sprintf(format, a))
+
+func Logf(format string, a... interface{}) {
+	Log(fmt.Sprintf(format, a...))
 }
 
 var KB = uint64(1024)
@@ -217,7 +220,6 @@ func main() {
 							err := os.Remove(match)
 							if err != nil {
 								Logf("Error from removing file: %s %q\n", match, err)
-								return
 							}
 						}()
 					} else {
