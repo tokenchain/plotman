@@ -17,7 +17,7 @@ class FarmPlot:
 
     def start_copyplot_spawn(self):
         for d in self.dsts:
-            p = Popen(["copyfil", self.checktmps, d, 10010001, self.log_file_path], stdout=PIPE, stderr=STDOUT)
+            p = Popen(["plmo", self.checktmps, d, 50000000, self.log_file_path], stdout=PIPE, stderr=STDOUT)
             output, error = p.communicate()
             output = output.strip().decode("utf-8")
             print("start moving file from temp folder to network FS farm location {}".format(d))

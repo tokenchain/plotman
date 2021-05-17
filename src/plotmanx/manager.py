@@ -162,6 +162,7 @@ def maybe_start_new_plot(dir_cfg: Directories, sched_cfg: Scheduling, plotting_c
                          '-r', str(plotting_cfg.n_threads),
                          '-u', str(plotting_cfg.n_buckets),
                          '-b', str(plotting_cfg.job_buffer),
+                         '-n64',
                          '-t', tmpdir,
                          '-d', tmpdir]
 
@@ -203,7 +204,7 @@ def maybe_start_new_plot(dir_cfg: Directories, sched_cfg: Scheduling, plotting_c
                                  stderr=subprocess.STDOUT,
                                  start_new_session=True)
 
-            psutil.Process(p.pid).nice(15)
+            psutil.Process(p.pid).nice(0)
 
             return (True, logmsg)
 

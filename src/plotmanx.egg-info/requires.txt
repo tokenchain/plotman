@@ -9,6 +9,7 @@ texttable
 flask
 flask-restplus
 prometheus-client
+xlsxwriter
 
 [dev]
 check-manifest

@@ -45,9 +45,9 @@ scheduling:
 plotting:
         k: 32
         e: True              # Use -e plotting option
-        n_threads: 4         # Threads per job
+        n_threads: 2         # Threads per job
         n_buckets: 128       # Number of buckets to split data into
-        job_buffer: 17068     # Per job memory
+        job_buffer: 25360     # Per job memory
         # If specified, pass through to the -f and -p options.  See CLI reference.
         farmer_pk: 861467df6768932f1c2f3a7c00a70f1e111b22b55de42c497fb93fd398eb4fd4b213f399e0930d265ffdc2b5655f96f5
         pool_pk: 8e211cb1118b95ac9da2f31fd159a74993bfcc8ab72bff79c880227185ba2b1f372b8e829bd99f5796eb4f68e41f30a9
@@ -68,7 +68,7 @@ fi
 
 """
 ransfar = """
-nohup ./plmo /mnt/local/tmp /mnt/nfs/{foldername}/chiaFinalData/ 10010001 &
+nohup ./plmo /mnt/local/tmp /mnt/nfs/{foldername}/chiaFinalData/ 50000000 &
 """
 
 upgrade = """
