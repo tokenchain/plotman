@@ -53,6 +53,7 @@ def phases_permit_new_job(phases, d, sched_cfg, dir_cfg):
 
     milestone = (sched_cfg.tmpdir_stagger_phase_major, sched_cfg.tmpdir_stagger_phase_minor)
     # tmpdir_stagger_phase_limit default is 1, as declared in configuration.py
+
     if len([p for p in phases if p < milestone]) >= sched_cfg.tmpdir_stagger_phase_limit:
         return False
 
@@ -98,22 +99,21 @@ def select_jobs_by_partial_id(jobs, partial_id):
     return selected
 
 
-def getygStaggerTime(jobs, sched_cfg: Scheduling) -> any:
+def getygStaggerTime(jobs, sched_cfg: Scheduling, cpud: int) -> any:
     youngest_job_age = min(jobs, key=job.Job.get_time_wall).get_time_wall() if jobs else MAX_AGE
-    global_stagger = int(sched_cfg.global_stagger_m * MIN)
-
+    global_stagger = int(sched_cfg.global_stagger_m[cpud] * MIN)
     return (youngest_job_age, global_stagger)
 
 
-def maybe_start_new_plot(dir_cfg: Directories, sched_cfg: Scheduling, plotting_cfg: Plotting):
-    if psutil.cpu_percent(interval=10) > 90:
-        return (False, 'cpu busy')
+def maybe_start_new_plot(dir_cfg: Directories, sched_cfg: Scheduling, plotting_cfg: Plotting, cputime: int):
+    if psutil.cpu_percent(interval=10) > 99:
+        return (False, 'cpu optimized!')
 
     jobs = job.Job.get_running_jobs(dir_cfg.log)
 
     wait_reason = None  # If we don't start a job this iteration, this says why.
 
-    (youngest_job_age, global_stagger) = getygStaggerTime(jobs, sched_cfg)
+    (youngest_job_age, global_stagger) = getygStaggerTime(jobs, sched_cfg, cputime)
 
     if youngest_job_age < global_stagger and sched_cfg.parallel <= 1:
         wait_reason = 'stagger (%ds/%ds)' % (youngest_job_age, global_stagger)

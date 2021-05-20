@@ -94,7 +94,7 @@ def curses_main_v2(stdscr):
 
     archdir_freebytes = None
     aging_reason = None
-
+    j = 0
     while True:
 
         # A full refresh scans for and reads info for running jobs from
@@ -119,9 +119,17 @@ def curses_main_v2(stdscr):
             )
             if plotting_active and a < b:
                 for i in range(cfg.scheduling.parallel):
+
+                    sw = j % cfg.scheduling.parallel
+                    g = (j - sw) / cfg.scheduling.parallel
+                    fy = [0 if g % 2 == 0 else 1]
+
                     (started, msg) = manager.maybe_start_new_plot(
-                        cfg.directories, cfg.scheduling, cfg.plotting
+                        cfg.directories, cfg.scheduling, cfg.plotting, fy
                     )
+
+                    j = j + 1
+
                     if started:
                         if aging_reason is not None:
                             log.log(aging_reason)

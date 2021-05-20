@@ -92,6 +92,7 @@ def get_term_width():
 
 def plotting(cfg: PlotmanConfig):
     print('starting plot loop')
+    j = 0
     while True:
         try:
 
@@ -102,14 +103,18 @@ def plotting(cfg: PlotmanConfig):
 
             if a > b or len(jobs) == 0:
                 for i in range(cfg.scheduling.parallel):
-
-                    (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)
+                    sw = j % cfg.scheduling.parallel
+                    g = (j - sw) / cfg.scheduling.parallel
+                    fy = [0 if g % 2 == 0 else 1]
+                    (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting, fy)
                     ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
-
+                    j = j + 1
                     if wait_reason:
                         print('> %s, %s' % (ts, wait_reason))
                     else:
                         print('start plot > %s' % ts)
+
+
 
             time.sleep(cfg.scheduling.polling_time_s)
 

@@ -31,14 +31,16 @@ directories:
                 #rsyncd_bwlimit: 80000  # Bandwidth limit in KB/s
                 #rsyncd_host: myfarmer
                 #rsyncd_user: chia
-                #   index: 0
+                #index: 0
 scheduling:
         tmpdir_stagger_phase_major: 2
         tmpdir_stagger_phase_minor: 3
         tmpdir_stagger_phase_limit: 25
         tmpdir_max_jobs: 40
-        global_max_jobs: 90
-        global_stagger_m: 162
+        global_max_jobs: 30
+        global_stagger_m: 
+                - 12
+                - 18
         polling_time_s: 30
         parallel: 6
         
@@ -136,9 +138,11 @@ class ExcelSheetGen:
         self.row += 1
 
     def dataEnter(self, wid, workerId, folder1, folder2, folder3):
+        wtxt = "W{}".format(wid)
+        wkidtxt="192.168.10.{}".format(workerId)
         # Some data we want to write to the worksheet.
-        self.worksheet.write(self.row, self.col, wid)
-        self.worksheet.write(self.row, self.col + 1, workerId)
+        self.worksheet.write(self.row, self.col, wtxt)
+        self.worksheet.write(self.row, self.col + 1, wkidtxt)
         self.worksheet.write(self.row, self.col + 2, folder1)
         self.worksheet.write(self.row, self.col + 3, folder2)
         self.worksheet.write(self.row, self.col + 4, folder3)
@@ -184,7 +188,7 @@ for i in servers:
         f.write(upgrade)
         f.close()
 
-    book.dataEnter("W{}".format(c + 1), i, d1, d2, d3)
+    book.dataEnter(c + 1, i, d1, d2, d3)
     print("excel new line")
 
     c += 1
