@@ -103,7 +103,7 @@ def plotting(cfg: PlotmanConfig):
                 minp.ParallelWorker(cfg.scheduling, cfg.directories)
 
             if cfg.apis.target is not "":
-                PostDat(Job.get_jobs_json(minp.LsJobs), cfg)
+                PostDat(minp.GenStatus(minp.LsJobs), cfg)
 
             print(f"s{cfg.scheduling.polling_time_s}\n")
             time.sleep(cfg.scheduling.polling_time_s)

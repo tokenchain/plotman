@@ -1,9 +1,11 @@
 import datetime
+import glob
 import operator
 import os
 import subprocess
 
 import pendulum
+import pkg_resources
 import psutil
 
 from .configuration import Scheduling, Directories, Plotting
@@ -32,6 +34,12 @@ class MintJ:
         self.plotdaemon = False
         self.pcfg = plotting_cfg
         self.jIter = 0
+
+        self.disk_bytes_read_last = 0
+        self.disk_bytes_write_last = 0
+        self.net_bytes_read_last = 0
+        self.net_bytes_write_last = 0
+        self.iowait_last = 0
 
     def Upcfg(self, schedule: Scheduling, plotting_cfg: Plotting):
         self.pcfg = plotting_cfg
@@ -181,3 +189,50 @@ class MintJ:
                     print('> %s, %s' % (ts, self.wait_reason))
                 else:
                     print('start plot > %s' % ts)
+
+    def GenStatus(self, jobs: list) -> dict:
+        count1 = len(glob.glob1("/mnt/local/tmp", "*.plot"))
+        count2 = len(glob.glob1("/mnt/local/temp", "*.plot"))
+
+        listplmo = Job.get_running_moving_jobs()
+
+        disk = psutil.disk_io_counters()
+        disk_bytes_read, disk_bytes_write = disk.read_bytes, disk.write_bytes
+        net = psutil.net_io_counters()
+        net_bytes_read, net_bytes_write = net.bytes_recv, net.bytes_sent
+        iowait = psutil.cpu_times().iowait
+        disks = [d.mountpoint for d in psutil.disk_partitions()]
+        disks_usage = [psutil.disk_usage(d) for d in disks]
+        disks_used = sum(d.used for d in disks_usage)
+        disks_total = sum(d.total for d in disks_usage)
+
+        d_info = dict(
+            jobls=[i.toJson() for i in jobs],
+            plotcount=count1 + count2,
+            movingcount=len(listplmo),
+            movingdetail=listplmo,
+            cpucount=psutil.cpu_count(),
+            stamp=int(datetime.datetime.now().timestamp()),
+            version=pkg_resources.get_distribution('plotmanx').version,
+
+            cpu_percent=psutil.cpu_percent(),
+            memory_percent=psutil.virtual_memory().percent,
+            cache_percent=round(psutil.virtual_memory().cached / psutil.virtual_memory().total * 100, 1),
+            slab_percent=round(psutil.virtual_memory().slab / psutil.virtual_memory().total * 100, 1),
+            swap_percent=psutil.swap_memory().percent,
+            disk_percent=round((disks_used / disks_total * 100), 2),
+            iowait_percent=round((iowait - self.iowait_last) / psutil.cpu_count() * 100, 1),
+            net_read_mb_s='{:,}'.format(int((net_bytes_read - self.net_bytes_read_last) / 1024 / 1024)),
+            net_write_mb_s='{:,}'.format(int((net_bytes_write - self.net_bytes_write_last) / 1024 / 1024)),
+            disk_read_mb_s='{:,}'.format(int((disk_bytes_read - self.disk_bytes_read_last) / 1024 / 1024)),
+            disk_write_mb_s='{:,}'.format(int((disk_bytes_write - self.disk_bytes_write_last) / 1024 / 1024)),
+            # lsof='{:,}'.format(int(subprocess.check_output('lsof | wc -l', shell=True).decode())),
+            net_fds='{:,}'.format(len(psutil.net_connections())),
+            pids='{:,}'.format(len(psutil.pids())),
+        )
+
+        self.net_bytes_read_last, self.net_bytes_write_last = net_bytes_read, net_bytes_write
+        self.disk_bytes_read_last, self.disk_bytes_write_last = disk_bytes_read, disk_bytes_write
+        self.iowait_last = iowait
+
+        return d_info

@@ -1,13 +1,11 @@
 # TODO do we use all these?
 import contextlib
-import glob
 import os
 import re
 import time
 from datetime import datetime
 
 import pendulum
-import pkg_resources
 import psutil
 
 from . import job
@@ -387,30 +385,6 @@ class Job:
             dst=self.dstdir,
             plotid=self.plot_id,
             logfile=self.logfile
-        )
-
-    @staticmethod
-    def get_jobs_json(jobs: list) -> dict:
-
-        count1 = len(glob.glob1("/mnt/local/tmp", "*.plot"))
-        count2 = len(glob.glob1("/mnt/local/temp", "*.plot"))
-
-        listplmo = Job.get_running_moving_jobs()
-
-        return dict(
-            jobls=[i.toJson() for i in jobs],
-            plotcount=count1 + count2,
-            movingcount=len(listplmo),
-            movingdetail=listplmo,
-            cpucount=psutil.cpu_count(),
-            info=psutil.cpu_stats()._asdict(),
-            perc=psutil.cpu_percent(),
-            vrm=psutil.virtual_memory()._asdict(),
-            swap=psutil.swap_memory()._asdict(),
-            disk=[y._asdict() for y in psutil.disk_partitions()],
-            net=psutil.net_io_counters(pernic=True)._asdict(),
-            stamp=int(datetime.now().timestamp()),
-            version=pkg_resources.get_distribution('plotmanx').version
         )
 
     def cancel(self):
