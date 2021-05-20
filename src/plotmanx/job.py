@@ -405,12 +405,12 @@ class Job:
             cpucount=psutil.cpu_count(),
             info=psutil.cpu_stats()._asdict(),
             perc=psutil.cpu_percent(),
-            vrm=psutil.virtual_memory(),
-            swap=psutil.swap_memory(),
-            disk=psutil.disk_partitions(),
-            net=psutil.net_io_counters(pernic=True),
+            vrm=psutil.virtual_memory()._asdict(),
+            swap=psutil.swap_memory()._asdict(),
+            disk=[y._asdict() for y in psutil.disk_partitions()],
+            net=psutil.net_io_counters(pernic=True)._asdict(),
             stamp=int(datetime.now().timestamp()),
-            version=pkg_resources.get_distribution('plotmanx')
+            version=pkg_resources.get_distribution('plotmanx').version
         )
 
     def cancel(self):
