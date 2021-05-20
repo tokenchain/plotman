@@ -104,6 +104,7 @@ def plotting(cfg: PlotmanConfig):
 
             if cfg.apis.target is not "":
                 PostDat(Job.get_jobs_json(minp.LsJobs), cfg)
+
             time.sleep(cfg.scheduling.polling_time_s)
 
         except ValidationError as te:
@@ -192,8 +193,9 @@ def main():
     # Stay alive, spawning plot jobs
     #
     if args.cmd == 'plot':
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            executor.submit(plotting, cfg)
+        plotting(cfg)
+        # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        #    executor.submit(plotting, cfg)
 
     #
     # Analysis of completed jobs
