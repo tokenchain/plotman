@@ -1,6 +1,5 @@
 import argparse
 import concurrent.futures
-import datetime
 import importlib
 import importlib.resources
 import os
@@ -14,6 +13,7 @@ from marshmallow import ValidationError
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
 from .api import apiOpen
+from .clockw import MintJ
 from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
 from .job import Job
@@ -92,29 +92,15 @@ def get_term_width():
 
 def plotting(cfg: PlotmanConfig):
     print('starting plot loop')
-    j = 0
+    minp = MintJ(cfg.plotting)
+    minp.PlotDaemon()
     while True:
         try:
+            minp.GenJobs(cfg.directories)
+            minp.Upcfg(cfg.scheduling, cfg.plotting)
 
-            jobs = Job.get_running_jobs(cfg.directories.log)
-            (a, b) = manager.getygStaggerTime(
-                jobs, cfg.scheduling
-            )
-
-            if a > b or len(jobs) == 0:
-                for i in range(cfg.scheduling.parallel):
-                    sw = j % cfg.scheduling.parallel
-                    g = (j - sw) / cfg.scheduling.parallel
-                    fy = [0 if g % 2 == 0 else 1]
-                    (tmp, wait_reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting, fy)
-                    ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
-                    j = j + 1
-                    if wait_reason:
-                        print('> %s, %s' % (ts, wait_reason))
-                    else:
-                        print('start plot > %s' % ts)
-
-
+            if minp.isCreateNewJobParallelReady:
+                minp.ParallelWorker(cfg.scheduling, cfg.directories)
 
             time.sleep(cfg.scheduling.polling_time_s)
 

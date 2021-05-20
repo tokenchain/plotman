@@ -20,9 +20,7 @@ directories:
         tmp:
                 - /mnt/local/tmp
         tmp2: /mnt/local/tmp
-        tmp_overrides:
-                "/mnt/local/tmp":
-                        tmpdir_max_jobs: 25
+
         dst:
 {list}
         archive:
@@ -35,9 +33,9 @@ directories:
 scheduling:
         tmpdir_stagger_phase_major: 2
         tmpdir_stagger_phase_minor: 3
-        tmpdir_stagger_phase_limit: 25
+        tmpdir_stagger_phase_limit: 6
         tmpdir_max_jobs: 40
-        global_max_jobs: 30
+        global_max_jobs: 36
         global_stagger_m: 
                 - 12
                 - 18
