@@ -5,7 +5,6 @@ marshmallow
 pendulum
 psutil~=5.8
 pyyaml
-sqlite3
 texttable
 flask
 flask-restplus

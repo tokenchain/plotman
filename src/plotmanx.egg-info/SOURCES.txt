@@ -57,5 +57,6 @@ src/plotmanx/_tests/resources/2021-04-04T19_00_47.681088-0400.log
 src/plotmanx/_tests/resources/__init__.py
 src/plotmanx/resources/__init__.py
 src/plotmanx/resources/plotman.yaml
+util/install
 util/listlogs
 util/plotcopy
