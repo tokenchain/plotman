@@ -1,16 +1,16 @@
 #!/usr/bin/python
 #
+import json
 import os
+import sqlite3
+from datetime import datetime
 
 import requests
-from flask import Flask
+from flask import Flask, request, app, Response
 from plotmanx.reporting import abbr_path, phase_str
-from prometheus_client.core import GaugeMetricFamily
 
-from . import configuration
 from . import job, plot_util
-from .configuration import PlotmanConfig
-from .job import Job
+from .configuration import PlotmanConfig, get_db
 
 
 def jsondata(jobs, tmp_prefix='', dst_prefix=''):
@@ -47,9 +47,35 @@ def apiOpen(cfg: PlotmanConfig):
 
 def PostDat(dp: dict, cfg: PlotmanConfig):
     # sending post request and saving response as response object
-    r = requests.post(url=f'{cfg.apis.target_report_hook}:{cfg.apis.port}/report', data=dp)
+    payload = json.loads(json.dumps(dp))
+    r = requests.post(url=f'{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
     print(r.text)
 
+
+@app.route('/report', methods=['POST'])
+def respond():
+    con = sqlite3.connect(get_db)
+    cur = con.cursor()
+
+    cur.execute('''CREATE TABLE IF NOT EXISTS systemchia (
+            tid text PRIMARY KEY,
+            block text NOT NULL,
+            ip text NOT NULL
+    );''')
+
+    ts = datetime.now().strftime('%m-%d %H:%M:%S')
+    # Insert a row of data
+    cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{request.data}','{request.remote_addr}')")
+
+    con.commit()
+    con.close()
+    return Response(status=200)
+
+
+"""
+
+
+from prometheus_client.core import GaugeMetricFamily
 
 class PlotmanCollector:
 
@@ -60,7 +86,7 @@ class PlotmanCollector:
         yield GaugeMetricFamily("plotman_jobs_count", "Number of plotting jobs running", value=count)
 
 
-"""
+
 if __name__ == "__main__":
     start_http_server(8001)
     REGISTRY.register(PlotmanCollector())

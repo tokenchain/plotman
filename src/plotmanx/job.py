@@ -7,6 +7,7 @@ import time
 from datetime import datetime
 
 import pendulum
+import pkg_resources
 import psutil
 
 
@@ -404,6 +405,8 @@ class Job:
             swap=psutil.swap_memory(),
             disk=psutil.disk_partitions(),
             net=psutil.net_io_counters(pernic=True),
+            stamp=int(datetime.now().timestamp()),
+            version=pkg_resources.get_distribution('plotmanx')
         )
 
     def cancel(self):

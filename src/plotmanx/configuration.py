@@ -70,7 +70,7 @@ class UserInterface:
 class Api:
     port: int = 199992
     api_polling_throttle_s: int = 5
-    target_report_hook: Optional[str] = ""
+    target: Optional[str] = ""
 
 
 @dataclass
@@ -84,12 +84,16 @@ class PlotmanConfig:
 
 def get_path():
     """Return path to where plotman.yaml configuration file should exist."""
-    return appdirs.user_config_dir("plotman") + "/plotman.yaml"
+    return f"{appdirs.user_config_dir('plotman')}/plotman.yaml"
 
 
 def get_log_path():
     """Return path to where plotman.yaml configuration file should exist."""
-    return appdirs.user_config_dir("plotman") + "/nfs.log"
+    return f"{appdirs.user_config_dir('plotman')}/nfs.log"
+
+
+def get_db():
+    return f"{appdirs.user_config_dir('plotman')}/system.db"
 
 
 def get_dst_directories(dir_cfg: Directories):
