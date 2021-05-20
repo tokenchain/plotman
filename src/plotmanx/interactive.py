@@ -5,9 +5,8 @@ import math
 import os
 import subprocess
 
-from . import archive, configuration, manager, reporting
+from . import archive, configuration, reporting
 from .clockw import MintJ
-from .job import Job
 
 
 class TerminalTooSmallError(Exception):
@@ -21,6 +20,8 @@ class Log:
 
     # TODO: store timestamp as actual timestamp indexing the messages
     def log(self, msg):
+        if msg is None:
+            return
         '''Log the message and scroll to the end of the log'''
         ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
         self.entries.append(ts + ' ' + msg)
