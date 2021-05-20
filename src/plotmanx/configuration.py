@@ -82,17 +82,17 @@ class PlotmanConfig:
     user_interface: UserInterface = field(default_factory=UserInterface)
 
 
-def get_path():
+def get_path() -> str:
     """Return path to where plotman.yaml configuration file should exist."""
     return f"{appdirs.user_config_dir('plotman')}/plotman.yaml"
 
 
-def get_log_path():
+def get_log_path() -> str:
     """Return path to where plotman.yaml configuration file should exist."""
     return f"{appdirs.user_config_dir('plotman')}/nfs.log"
 
 
-def get_db():
+def get_db_path() -> str:
     return f"{appdirs.user_config_dir('plotman')}/system.db"
 
 

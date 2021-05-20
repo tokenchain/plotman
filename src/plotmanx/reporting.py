@@ -237,3 +237,30 @@ def dirs_report(jobs, dir_cfg, sched_cfg, width):
         'archive dirs free space:\n' +
         arch_dir_report(archive.get_archdir_freebytes(dir_cfg.archive), width) + '\n'
     )
+
+
+
+def jsondata(jobs, tmp_prefix='', dst_prefix='') -> list:
+    jobsr = list()
+    for i, j in enumerate(sorted(jobs, key=job.Job.get_time_wall)):
+        with j.proc.oneshot():
+            dictionary = {
+                'plotid': j.plot_id[:8],
+                'k': j.k,
+                'tmp': abbr_path(j.tmpdir, tmp_prefix),
+                'dst': abbr_path(j.dstdir, dst_prefix),
+                'wall': plot_util.time_format(j.get_time_wall()),
+                'phase': phase_str(j.progress()),
+                'tmpdisk': plot_util.human_format(j.get_tmp_usage(), 0),
+                'pid': j.proc.pid,
+                'stat': j.get_run_status(),
+                'mem': plot_util.human_format(j.get_mem_usage(), 1),
+                'user': plot_util.time_format(j.get_time_user()),
+                'sys': plot_util.time_format(j.get_time_sys()),
+                'io': plot_util.time_format(j.get_time_iowait()),
+                'freezed': plot_util.is_freezed(j),
+                'logfile': os.path.basename(j.logfile)
+            }
+            jobsr.append(dictionary)
+
+    return jobsr

@@ -58,5 +58,6 @@ src/plotmanx/_tests/resources/__init__.py
 src/plotmanx/resources/__init__.py
 src/plotmanx/resources/plotman.yaml
 util/install
+util/installmaster
 util/listlogs
 util/plotcopy
