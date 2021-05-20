@@ -93,7 +93,7 @@ def get_log_path() -> str:
 
 
 def get_db_path() -> str:
-    return f"{appdirs.user_config_dir('plotman')}/system.db"
+    return f"{appdirs.user_config_dir('plotman')}/rsystem.db"
 
 
 def get_dst_directories(dir_cfg: Directories):

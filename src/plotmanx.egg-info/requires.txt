@@ -6,8 +6,7 @@ pendulum
 psutil~=5.8
 pyyaml
 texttable
-flask
-flask-restplus
+tornado
 prometheus-client
 xlsxwriter
 
