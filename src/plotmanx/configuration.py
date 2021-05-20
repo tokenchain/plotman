@@ -70,6 +70,7 @@ class UserInterface:
 class Api:
     port: int = 199992
     api_polling_throttle_s: int = 5
+    target_report_hook: Optional[str] = ""
 
 
 @dataclass

@@ -1,5 +1,6 @@
 # TODO do we use all these?
 import contextlib
+import glob
 import os
 import re
 import time
@@ -26,6 +27,13 @@ def is_plotting_cmdline(cmdline):
             and cmdline[1].endswith('/chia')
             and 'plots' == cmdline[2]
             and 'create' == cmdline[3]
+    )
+
+
+def is_plot_moving(cmdline):
+    return (
+            len(cmdline) > 3
+            and cmdline[0].endswith('plmo')
     )
 
 
@@ -99,6 +107,19 @@ class Job:
                         except Exception as e:
                             print("Error:", e)
                             pass
+
+        return jobs
+
+    @staticmethod
+    def get_running_moving_jobs() -> list:
+        jobs = []
+
+        for proc in psutil.process_iter(['pid', 'cmdline']):
+            # Ignore processes which most likely have terminated between the time of iteration and data access.
+            with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
+                if is_plot_moving(proc.cmdline()):
+                    job = " ".join(proc.cmdline())
+                    jobs.append(job)
 
         return jobs
 
@@ -347,6 +368,43 @@ class Job:
             if self.tmpdir in f.path or self.tmp2dir in f.path or self.dstdir in f.path:
                 temp_files.add(f.path)
         return temp_files
+
+    def toJson(self) -> dict:
+        return dict(
+            plot_id=self.plot_id,
+            k=self.k,
+            r=self.r,
+            b=self.b,
+            u=self.u,
+            pid=self.proc.pid,
+            tmp=self.tmpdir,
+            tmp2=self.tmp2dir,
+            dst=self.dstdir,
+            plotid=self.plot_id,
+            logfile=self.logfile
+        )
+
+    @staticmethod
+    def get_jobs_json(jobs: list) -> dict:
+
+        count1 = len(glob.glob1("/mnt/local/tmp", "*.plot"))
+        count2 = len(glob.glob1("/mnt/local/temp", "*.plot"))
+
+        listplmo = Job.get_running_moving_jobs()
+
+        return dict(
+            jobls=[i.toJson() for i in jobs],
+            plotcount=count1 + count2,
+            movingcount=len(listplmo),
+            movingdetail=listplmo,
+            cpucount=psutil.cpu_count(),
+            info=psutil.cpu_stats()._asdict(),
+            perc=psutil.cpu_percent(),
+            vrm=psutil.virtual_memory(),
+            swap=psutil.swap_memory(),
+            disk=psutil.disk_partitions(),
+            net=psutil.net_io_counters(pernic=True),
+        )
 
     def cancel(self):
         'Cancel an already running job'

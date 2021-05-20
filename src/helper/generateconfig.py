@@ -36,9 +36,7 @@ scheduling:
         tmpdir_stagger_phase_limit: 6
         tmpdir_max_jobs: 40
         global_max_jobs: 36
-        global_stagger_m: 
-                - 12
-                - 18
+        global_stagger_m: [12,18]
         polling_time_s: 30
         parallel: 6
         

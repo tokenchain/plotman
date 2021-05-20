@@ -12,7 +12,7 @@ from marshmallow import ValidationError
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
-from .api import apiOpen
+from .api import apiOpen, PostDat
 from .clockw import MintJ
 from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
@@ -102,6 +102,8 @@ def plotting(cfg: PlotmanConfig):
             if minp.isCreateNewJobParallelReady:
                 minp.ParallelWorker(cfg.scheduling, cfg.directories)
 
+            if cfg.apis.target_report_hook is not "":
+                PostDat(Job.get_jobs_json(minp.LsJobs), cfg)
             time.sleep(cfg.scheduling.polling_time_s)
 
         except ValidationError as te:

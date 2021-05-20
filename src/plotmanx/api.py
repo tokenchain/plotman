@@ -1,12 +1,11 @@
 #!/usr/bin/python
 #
 import os
-import time
 
-from flask import Flask, jsonify
+import requests
+from flask import Flask
 from plotmanx.reporting import abbr_path, phase_str
-from prometheus_client import start_http_server
-from prometheus_client.core import GaugeMetricFamily, REGISTRY
+from prometheus_client.core import GaugeMetricFamily
 
 from . import configuration
 from . import job, plot_util
@@ -39,15 +38,17 @@ def jsondata(jobs, tmp_prefix='', dst_prefix=''):
 
 
 def apiOpen(cfg: PlotmanConfig):
-    def status():
-        jobs = job.Job.get_running_jobs(cfg.directories.log)
-        return jsonify(jsondata(jobs))
-
     appc = Flask(__name__)
-    appc.add_url_rule('status', '/status')
-    appc.view_functions['status'] = status
+    # appc.add_url_rule('status', '/status')
+    # appc.view_functions['status'] = status
     print("api port %s is now listening".format(cfg.apis.port))
     appc.run(host="0.0.0.0", port=cfg.apis.port)
+
+
+def PostDat(dp: dict, cfg: PlotmanConfig):
+    # sending post request and saving response as response object
+    r = requests.post(url=f'{cfg.apis.target_report_hook}:{cfg.apis.port}/report', data=dp)
+    print(r.text)
 
 
 class PlotmanCollector:
@@ -59,8 +60,10 @@ class PlotmanCollector:
         yield GaugeMetricFamily("plotman_jobs_count", "Number of plotting jobs running", value=count)
 
 
+"""
 if __name__ == "__main__":
     start_http_server(8001)
     REGISTRY.register(PlotmanCollector())
     while True:
         time.sleep(1)
+"""
