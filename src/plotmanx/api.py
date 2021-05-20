@@ -42,7 +42,6 @@ if __name__ == "__main__":
 
 
 class MainHandler(web.RequestHandler):
-
     def prepare(self):
         if self.request.headers.get("Content-Type", "").startswith("application/json"):
             self.json_args = json.loads(self.request.body)
@@ -73,7 +72,7 @@ class MainHandler(web.RequestHandler):
 
 
 def apiOpen(cfg: PlotmanConfig):
-    print(f"api port %d is now listening {cfg.apis.port}")
+    print(f"api port {cfg.apis.port} is now listening")
     application = web.Application([(r"/report", MainHandler)])
     http_server = httpserver.HTTPServer(application)
     http_server.listen(cfg.apis.port)

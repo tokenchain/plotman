@@ -218,8 +218,7 @@ def main():
             interactive.run_interactive()
 
         elif args.cmd == 'api':
-            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                executor.submit(apiOpen, cfg)
+            apiOpen(cfg)
 
         # Start running archival
         elif args.cmd == 'archive':
