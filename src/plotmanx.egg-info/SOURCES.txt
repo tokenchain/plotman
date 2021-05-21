@@ -5,6 +5,7 @@ MANIFEST.in
 README.md
 VERSION
 n.sh
+nvme_linux_0.4.80.zip
 pyproject.toml
 runbuild.sh
 setup.cfg
@@ -13,9 +14,17 @@ test
 tox.ini
 update.sh
 .github/workflows/ci.yml
+nvmecc/b
+nvmecc/farming.log
+nvmecc/ff.log
 nvmecc/go.mod
+nvmecc/nohup.out
+nvmecc/stockup
+nvmecc/stop
 nvmecc/testrun.sh
+nvmecc/unlock
 nvmecc/vncc.go
+nvmecc/worker
 nvmecc/pkg/calle.go
 nvmecc/pkg/skv.go
 nvmecc/temp/writeLock.db
