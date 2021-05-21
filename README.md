@@ -70,42 +70,6 @@ unavailable, plotting continues uninterrupted.
 
 ## Screenshot Overview
 
-```
-Plotman 19:01:06 (refresh 9s/20s)  |  Plotting: stagger (1623s/1800s) Archival: active pid 1599918
-Prefixes:  tmp=/mnt/tmp  dst=/home/chia/chia/plots  archive=/plots (remote)
-
-  #       plot id    k   tmp   dst    wall   phase    tmp       pid   stat      mem    user    sys     io               
-  0   6b4e7375...   32    03   001    0:27     1:2    71G   1590196    SLP     5.5G    0:52   0:02     0s
-  1   9ab50d0e...   32    02   005    1:00     1:4   199G   1539209    SLP     5.5G    3:50   0:09     0s
-  2   018cf561...   32    01   000    1:32     1:5   224G   1530045    SLP     5.5G    4:46   0:11     2s
-  3   f771de9c...   32    00   004    2:03     1:5   241G   1524772    SLP     5.5G    5:43   0:14     2s
-...
- 16   58045bef...   32    10   002   11:23     3:5   193G   1381622    RUN     5.4G   15:02   0:53   0:02
- 17   8134a2dd...   32    11   003   11:55     3:6   148G   1372206    RUN     5.4G   15:27   0:57   0:03
- 18   50165422...   32    08   001   12:43     3:6   102G   1357782    RUN     5.4G   16:14   1:00   0:03
- 19   100df84f...   32    09   005   13:19     4:0      0   1347430    DSK   705.9M   16:44   1:04   0:06
-
-tmp   ready    phases     tmp   ready    phases        dst   plots   GB free         phases         priority 
- 00      --   1:5, 3:4     06      --   2:4            000   1       1890      1:5, 2:2, 3:4        47
- 01      --   1:5, 3:4     07      --   2:2            001   0       1998      1:2, 1:7, 3:2, 3:6   34
- 02      --   1:4, 3:3     08      --   1:7, 3:6       002   0       1967      1:6, 2:5, 3:5        42
- 03      --   1:2, 3:2     09      --   2:1, 4:0       003   0       1998      1:6, 3:1, 3:6        34
- 04      OK   3:1          10      --   1:6, 3:5       004   0       1998      1:5, 2:4, 3:4        46
- 05      OK   2:5          11      --   1:6, 3:6       005   0       1955      1:4, 2:1, 3:3, 4:0   18
-
-Archive dirs free space
-000:   94GB | 005:   94GB | 012:   24GB | 017:   99GB | 022:   94GB | 027:   94GB | 032: 9998GB | 037: 9998GB
-001:   94GB | 006:   93GB | 013:   25GB | 018:   94GB | 023:   94GB | 028:   94GB | 033: 9998GB |
-002:   93GB | 009:   25GB | 014:   93GB | 019:   31GB | 024:   94GB | 029: 7777GB | 034: 9998GB |
-003:   94GB | 010:   25GB | 015:   94GB | 020:   47GB | 025:   94GB | 030: 9998GB | 035: 9998GB |
-004:   94GB | 011:   25GB | 016:   99GB | 021:   93GB | 026:   94GB | 031: 9998GB | 036: 9998GB |
-
-Log:
-01-02 18:33:53 Starting plot job: chia plots create -k 32 -r 8 -u 128 -b 4580 -t /mnt/tmp/03 -2 /mnt/tmp/a -d /home/chi
-01-02 18:33:53 Starting archive: rsync --bwlimit=100000 --remove-source-files -P /home/chia/chia/plots/004/plot-k32-202
-01-02 18:52:40 Starting archive: rsync --bwlimit=100000 --remove-source-files -P /home/chia/chia/plots/000/plot-k32-202
-```
-
 The screenshot shows some of the main features of Plotman.
 
 The first line shows the status.  The plotting status shows whether we just
@@ -217,6 +181,11 @@ If you are forking Plotman, simply replace the installation step with `pip insta
 ## Overview
 
 This document holds guidance on maintaining aspects of plotman.
+
+## Using docker
+
+https://gist.github.com/snikch/ab15159e633d21619bdf6a056bec8830
+
 
 ## The `chia plots create` CLI parsing code
 

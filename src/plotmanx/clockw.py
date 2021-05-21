@@ -183,7 +183,12 @@ class MintJ:
         for i in range(self.parallel):
             sw = self.jIter % self.parallel
             g = (self.jIter - sw) / self.parallel
-            self.cpu_clock = [0 if g % 2 == 0 else 1]
+
+            if g % 2 == 0:
+                self.cpu_clock = 0
+            else:
+                self.cpu_clock = 1
+
             started = self.JobCreate()
             self.jIter = self.jIter + 1
             if not self.plotdaemon:
