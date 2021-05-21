@@ -223,14 +223,14 @@ def main():
         elif args.cmd == 'api':
             apiOpen(cfg)
 
+        elif args.cmd == 'nfs':
+            farm = FarmPlot(cfg)
+            farm.start_copyplot_spawn()
+
         # Start running archival
         elif args.cmd == 'archive':
             with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
                 executor.submit(archivePlots, cfg)
-
-        elif args.cmd == 'nfs':
-            farm = FarmPlot(cfg)
-            farm.start_copyplot_spawn()
 
         # Debugging: show the destination drive usage schedule
         elif args.cmd == 'dsched':

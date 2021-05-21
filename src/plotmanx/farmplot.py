@@ -1,3 +1,4 @@
+import glob
 from subprocess import Popen, PIPE, STDOUT
 
 from . import configuration
@@ -16,10 +17,15 @@ class FarmPlot:
         self.log_file_path = configuration.get_log_path()
 
     def start_copyplot_spawn(self):
-        for d in self.dsts:
-            p = Popen(["plmo", self.checktmps, d, 50000000, self.log_file_path], stdout=PIPE, stderr=STDOUT)
-            output, error = p.communicate()
-            output = output.strip().decode("utf-8")
-            print("start moving file from temp folder to network FS farm location {}".format(d))
-            if p.returncode:
-                print(f"E: {output}")
+
+        count1 = len(glob.glob1("~/chia-blockchain", "plmo"))
+        if count1 >= 1:
+            for d in self.dsts:
+                p = Popen(["plmo", self.checktmps, d, 50000000, self.log_file_path], stdout=PIPE, stderr=STDOUT)
+                output, error = p.communicate()
+                output = output.strip().decode("utf-8")
+                print("start moving file from temp folder to network FS farm location {}".format(d))
+                if p.returncode:
+                    print(f"E: {output}")
+        else:
+            print("Did not find the plmo executable.")
