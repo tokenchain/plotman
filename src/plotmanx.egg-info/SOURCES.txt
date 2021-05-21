@@ -18,7 +18,6 @@ nvmecc/testrun.sh
 nvmecc/vncc.go
 nvmecc/pkg/calle.go
 nvmecc/pkg/skv.go
-nvmecc/temp/test.sh
 nvmecc/temp/writeLock.db
 src/export/csv.py
 src/export/parser.py

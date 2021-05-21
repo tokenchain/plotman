@@ -3,7 +3,7 @@
 gitpush(){
     git add .
     #git remote add origin https://gitee.com/jjhoc/vue-tronlink.git
-    git commit -m "package updates related items. please check in commit details"
+    git commit -m "quick acme bug fix"
     git push
 }
 

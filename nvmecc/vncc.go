@@ -17,7 +17,8 @@ import (
 
 var BUFFERSIZE int64
 var markTime int64
-func copy(src, dst string, BUFFERSIZE int64) error {
+
+func ccoyc(src, dst string, BUFFERSIZE int64) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
 		return err
@@ -64,7 +65,7 @@ func copy(src, dst string, BUFFERSIZE int64) error {
 		}
 
 		if n == 0 || err == io.EOF {
-			//finish copying then the next
+			//finish ccoycing then the next
 			break
 		}
 
@@ -74,41 +75,36 @@ func copy(src, dst string, BUFFERSIZE int64) error {
 			return err
 		}
 
-		if  time.Now().Unix() - markTime > 60 {
+		if time.Now().Unix()-markTime > 60 {
 			markTime = time.Now().Unix()
 			buffin = buffin + bn
 			percent := float64(buffin) / float64(total) * 100
 			nowcc := big.NewFloat(percent).SetPrec(3).String()
 			Logf("Now:|%6d|%6s %%|\n", buffin, nowcc)
 		}
-
 	}
 	return err
 }
 
 func blocktransfer(source, destination string) {
-
 	BUFFERSIZE, err := strconv.ParseInt(os.Args[3], 10, 64)
-
 	if err != nil {
 		Logf("Invalid buffer size: %q\n", err)
 		return
 	}
-
 	Logf("Copying %s to %s\n", source, destination)
-
-	result := copy(source, destination, BUFFERSIZE)
-
+	result := ccoyc(source, destination, BUFFERSIZE)
 	if result != nil {
 		Logf("File copying failed: %q\n", err)
 	} else {
 		Logf("File moving file done: %s\n", destination)
 	}
 }
-
+func sk_open(src_path string) (*pkg.KVStore, error) {
+	return pkg.SKVOpen(fmt.Sprintf("%s/writeLock.db", src_path))
+}
 func mark(sourceDir, filename, destinationDir string, lock bool) {
-	store, err := pkg.SKVOpen(fmt.Sprintf("%s/writeLock.db", sourceDir))
-
+	store, err := sk_open(sourceDir)
 	if err != nil {
 		Logf("store 1 err %v", err)
 		return
@@ -129,18 +125,16 @@ func mark(sourceDir, filename, destinationDir string, lock bool) {
 
 func isLock(sourceDir, filename string) bool {
 	var info string
-	store, err := pkg.SKVOpen(fmt.Sprintf("%s/writeLock.db", sourceDir))
+	store, err := sk_open(sourceDir)
 	if err != nil {
 		return false
 	}
 	defer store.Close()
 	// get: fetches from boltdb and does gob decode
 	err = store.Get(filename, &info)
-
 	if err == pkg.ErrNotFound {
 		return false
 	}
-
 	if &info != nil {
 		// busy in use
 		return true
@@ -148,7 +142,29 @@ func isLock(sourceDir, filename string) bool {
 		return false
 	}
 }
-
+func isStop(sourceDir string) bool {
+	var enabled bool
+	store, err := sk_open(sourceDir)
+	if err != nil {
+		return false
+	}
+	defer store.Close()
+	// get: fetches from boltdb and does gob decode
+	err = store.Get("updateStop", &enabled)
+	if err == pkg.ErrNotFound {
+		err = store.Put("updateStop", false)
+		return false
+	}
+	return enabled
+}
+func setStop(sdir string, ac bool) {
+	store, err := sk_open(sdir)
+	if err != nil {
+		return
+	}
+	defer store.Close()
+	err = store.Put("updateStop", ac)
+}
 func Log(s string) {
 	var optionalLogFile = ""
 
@@ -169,7 +185,7 @@ func Log(s string) {
 	log.Println(fmt.Sprintf("%s", s))
 }
 
-func Logf(format string, a... interface{}) {
+func Logf(format string, a ...interface{}) {
 	Log(fmt.Sprintf(format, a...))
 }
 
@@ -184,16 +200,37 @@ func main() {
 	}
 
 	sourceDir := os.Args[1]
-	destinationDir := os.Args[2]
-	k := strings.Index(destinationDir, ",")
+	ra := os.Args[2]
+	k := strings.Index(ra, ",")
+	destinationDir := ""
+
+	if ra == "update" {
+		control := os.Args[3]
+		if control == "yes" {
+			setStop(sourceDir, true)
+			fmt.Println("ok, yes unlock up for the next stop")
+			return
+		} else if control == "no" {
+			setStop(sourceDir, false)
+			fmt.Println("ok, unlocked the control is now updated")
+			return
+		} else {
+			fmt.Println("error, update control is not in control")
+			return
+		}
+	} else {
+		destinationDir = ra
+	}
 
 	if k > -1 {
-
 		Log("exit and done. because there is not yet developed for destination in list yet")
 	} else {
-
 		for {
-
+			if isStop(sourceDir) {
+				Logf("Complete and stop worker %d", os.Getegid())
+				Log("==============================================")
+				break
+			}
 			matches, _ := filepath.Glob(fmt.Sprintf("%s/*.plot", sourceDir))
 			Logf("Found plot files %d", len(matches))
 
