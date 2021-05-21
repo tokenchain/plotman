@@ -47,6 +47,7 @@ class MintJ:
         self.global_stagger_m = schedule.global_stagger_m
         self.youngest_job_age = min(self.jobs, key=Job.get_time_wall).get_time_wall() if self.jobs else MAX_AGE
         self.global_stagger = int(self.global_stagger_m[self.cpu_clock] * MIN)
+        self.parallel = schedule.parallel
 
     def GenJobs(self, dir_cfg: Directories):
         self.jobs = Job.get_running_jobs(dir_cfg.log)
@@ -141,7 +142,9 @@ class MintJ:
                     plot_args.append(dir_cfg.tmp2)
 
                 logmsg = ('Starting plot job: %s ; logging to %s' % (' '.join(plot_args), logfile))
+
                 self.wait_reason = logmsg
+
                 try:
                     open_log_file = open(logfile, 'x')
                 except FileExistsError:
