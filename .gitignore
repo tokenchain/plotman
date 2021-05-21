@@ -3,5 +3,6 @@ venv
 .idea
 build
 dist
-copyop/temp/*.plot
-copyop/dst
+nvmecc/temp/*.plot
+nvmecc/dst
+nvmecc/plmo
