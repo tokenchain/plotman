@@ -16,7 +16,7 @@ import (
 )
 
 var BUFFERSIZE int64
-
+var markTime int64
 func copy(src, dst string, BUFFERSIZE int64) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
@@ -68,17 +68,18 @@ func copy(src, dst string, BUFFERSIZE int64) error {
 			break
 		}
 
-		downb, err := destination.Write(buf[:n])
+		bn, err := destination.Write(buf[:n])
 
 		if err != nil {
 			return err
 		}
 
-		if (int64(downb)-int64(buffin)) > (BUFFERSIZE/5) && downb > 10000 {
-			buffin = downb
-			percent := float64(downb) / float64(total) * 100
+		if  time.Now().Unix() - markTime > 60 {
+			markTime = time.Now().Unix()
+			buffin = buffin + bn
+			percent := float64(buffin) / float64(total) * 100
 			nowcc := big.NewFloat(percent).SetPrec(3).String()
-			Logf("Now:|%6d|%6s %%|\n", downb, nowcc)
+			Logf("Now:|%6d|%6s %%|\n", buffin, nowcc)
 		}
 
 	}
@@ -130,21 +131,20 @@ func isLock(sourceDir, filename string) bool {
 	var info string
 	store, err := pkg.SKVOpen(fmt.Sprintf("%s/writeLock.db", sourceDir))
 	if err != nil {
-		Log("check 1 false")
 		return false
 	}
 	defer store.Close()
 	// get: fetches from boltdb and does gob decode
 	err = store.Get(filename, &info)
+
 	if err == pkg.ErrNotFound {
-		Log("check 2 false not found")
 		return false
 	}
 
 	if &info != nil {
+		// busy in use
 		return true
 	} else {
-		Log("check 3 false no info")
 		return false
 	}
 }
@@ -202,6 +202,8 @@ func main() {
 				r := rand.New(s) // initialize local pseudorandom generator
 				match := matches[r.Intn(len(matches))]
 				if isLock(sourceDir, match) {
+					Logf("Working directory is in busy %s, lets wait 10s", match)
+					time.Sleep(10 * time.Second)
 					continue
 				}
 				fileinfo, _ := os.Stat(match)
@@ -223,7 +225,7 @@ func main() {
 							}
 						}()
 					} else {
-						Log("there is not enough space")
+						Log("Warning! There is not enough space...")
 						Logf("Free:", usage.Free()/(KB*KB))
 						Logf("Available:", usage.Available()/(KB*KB))
 						Logf("Size:", usage.Size()/(KB*KB))

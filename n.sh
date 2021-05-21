@@ -88,9 +88,12 @@ clean_repo() {
 }
 
 buildcopyop(){
-  cd copyop
-  env GOOS=linux GOARCH=amd64 go build -o plmo mover.go
-  zip plmo.zip plmo 
+  VERSION=$(cat VERSION)
+  increment_version $VERSION >version
+  VERSION=$(cat version)
+  cd nvmecc
+  env GOOS=linux GOARCH=amd64 go build -o plmo vncc.go
+  zip nvme_linux_${VERSION}.zip plmo 
 }
 
 

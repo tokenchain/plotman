@@ -64,7 +64,6 @@ if [ ! -d "{target}" ]; then
     sudo mount -t nfs 192.168.10.{worker_id}:/minerdata {target} -o nolock
 fi
 
-
 """
 ransfar = """
 nohup ./plmo /mnt/local/tmp /mnt/nfs/{foldername}/chiaFinalData/ 50000000 &
