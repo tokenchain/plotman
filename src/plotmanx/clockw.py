@@ -32,7 +32,9 @@ class MintJ:
         self.aging_reason = None
         self.jobs = None
         self.plotdaemon = False
-        self.pcfg = plotting_cfg
+        self.schedule_x = None
+        self.dir_cfg_x = None
+        self.plotcfg_x = plotting_cfg
         self.jIter = 0
 
         self.disk_bytes_read_last = 0
@@ -42,7 +44,8 @@ class MintJ:
         self.iowait_last = 0
 
     def Upcfg(self, schedule: Scheduling, plotting_cfg: Plotting):
-        self.pcfg = plotting_cfg
+        self.schedule_x = schedule
+        self.plotcfg_x = plotting_cfg
         self.global_max_jobs = schedule.global_max_jobs
         self.global_stagger_m = schedule.global_stagger_m
         self.youngest_job_age = min(self.jobs, key=Job.get_time_wall).get_time_wall() if self.jobs else MAX_AGE
@@ -50,6 +53,7 @@ class MintJ:
         self.parallel = schedule.parallel
 
     def GenJobs(self, dir_cfg: Directories):
+        self.dir_cfg_x = dir_cfg
         self.jobs = Job.get_running_jobs(dir_cfg.log)
 
     def CacheGenJobs(self, dir_cfg: Directories):
@@ -71,7 +75,7 @@ class MintJ:
     def isCreateNewJobParallelReady(self) -> bool:
         return self.youngest_job_age > self.global_stagger or len(self.jobs) == 0
 
-    def JobCreate(self, sched_cfg: Scheduling, dir_cfg: Directories):
+    def JobCreate(self):
         if psutil.cpu_percent(interval=10) > 99:
             self.wait_reason = 'cpu optimized!'
 
@@ -83,10 +87,10 @@ class MintJ:
 
         else:
 
-            tmp_to_all_phases = [(d, job_phases_for_tmpdir(d, self.jobs)) for d in dir_cfg.tmp]
+            tmp_to_all_phases = [(d, job_phases_for_tmpdir(d, self.jobs)) for d in self.dir_cfg_x.tmp]
 
             eligible = [(d, phases) for (d, phases) in tmp_to_all_phases
-                        if phases_permit_new_job(phases, d, sched_cfg, dir_cfg)]
+                        if phases_permit_new_job(phases, d, self.schedule_x, self.dir_cfg_x)]
 
             rankable = [(d, phases[0]) if phases else (d, (999, 999)) for (d, phases) in eligible]
 
@@ -98,7 +102,7 @@ class MintJ:
                 # Select the dst dir least recently selected
 
                 """ 
-                (is_dst, dst_dir) = configuration.get_dst_directories(dir_cfg)
+                (is_dst, dst_dir) = configuration.get_dst_directories(self.dir_cfg_x)
                    dstdir = ''
                    if is_dst:
 
@@ -114,32 +118,32 @@ class MintJ:
                 """
 
                 logfile = os.path.join(
-                    dir_cfg.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'
+                    self.dir_cfg_x.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'
                 )
 
                 plot_args = ['chia', 'plots', 'create',
-                             '-k', str(self.pcfg.k),
-                             '-r', str(self.pcfg.n_threads),
-                             '-u', str(self.pcfg.n_buckets),
-                             '-b', str(self.pcfg.job_buffer),
+                             '-k', str(self.plotcfg_x.k),
+                             '-r', str(self.plotcfg_x.n_threads),
+                             '-u', str(self.plotcfg_x.n_buckets),
+                             '-b', str(self.plotcfg_x.job_buffer),
                              '-n64',
                              '-t', tmpdir,
                              '-d', tmpdir]
 
-                if self.pcfg.e:
+                if self.plotcfg_x.e:
                     plot_args.append('-e')
 
-                if self.pcfg.farmer_pk is not None:
+                if self.plotcfg_x.farmer_pk is not None:
                     plot_args.append('-f')
-                    plot_args.append(self.pcfg.farmer_pk)
+                    plot_args.append(self.plotcfg_x.farmer_pk)
 
-                if self.pcfg.pool_pk is not None:
+                if self.plotcfg_x.pool_pk is not None:
                     plot_args.append('-p')
-                    plot_args.append(self.pcfg.pool_pk)
+                    plot_args.append(self.plotcfg_x.pool_pk)
 
-                if dir_cfg.tmp2 is not None:
+                if self.dir_cfg_x.tmp2 is not None:
                     plot_args.append('-2')
-                    plot_args.append(dir_cfg.tmp2)
+                    plot_args.append(self.dir_cfg_x.tmp2)
 
                 logmsg = ('Starting plot job: %s ; logging to %s' % (' '.join(plot_args), logfile))
 
@@ -175,17 +179,17 @@ class MintJ:
     def PlotDaemon(self):
         self.plotdaemon = True
 
-    def ParallelWorker(self, s: Scheduling, d: Directories):
+    def ParallelWorker(self):
         for i in range(self.parallel):
             sw = self.jIter % self.parallel
             g = (self.jIter - sw) / self.parallel
             self.cpu_clock = [0 if g % 2 == 0 else 1]
-            started = self.JobCreate(s, d)
+            started = self.JobCreate()
             self.jIter = self.jIter + 1
             if not self.plotdaemon:
                 if started:
                     self.wait_reason = '<just started job>'
-                    self.CacheGenJobs(d)
+                    self.CacheGenJobs(self.dir_cfg_x)
             else:
                 ts = datetime.datetime.now().strftime('%m-%d %H:%M:%S')
                 if self.wait_reason:

@@ -103,7 +103,7 @@ def plotting(cfg: PlotmanConfig):
             minp.Upcfg(cfg.scheduling, cfg.plotting)
 
             if minp.isCreateNewJobParallelReady:
-                minp.ParallelWorker(cfg.scheduling, cfg.directories)
+                minp.ParallelWorker()
 
             if cfg.apis.target is not "":
                 PostDat(minp.GenStatus(minp.LsJobs), cfg)
