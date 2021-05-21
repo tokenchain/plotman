@@ -96,6 +96,9 @@ def plotting(cfg: PlotmanConfig):
     minp.PlotDaemon()
     while True:
         try:
+            print(f"s{cfg.scheduling.polling_time_s}\n")
+            time.sleep(cfg.scheduling.polling_time_s)
+
             minp.GenJobs(cfg.directories)
             minp.Upcfg(cfg.scheduling, cfg.plotting)
 
@@ -104,9 +107,6 @@ def plotting(cfg: PlotmanConfig):
 
             if cfg.apis.target is not "":
                 PostDat(minp.GenStatus(minp.LsJobs), cfg)
-
-            print(f"s{cfg.scheduling.polling_time_s}\n")
-            time.sleep(cfg.scheduling.polling_time_s)
 
         except ValidationError as te:
             print('got ConfigurationException from io', te)
@@ -123,6 +123,7 @@ def plotting(cfg: PlotmanConfig):
         except IOError as io:
             print('got IOError from io', io)
             continue
+
 
     print('exit from error unknown...')
 

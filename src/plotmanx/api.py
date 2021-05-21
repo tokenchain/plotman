@@ -12,13 +12,10 @@ from .configuration import PlotmanConfig, get_db_path
 
 
 def PostDat(dp: dict, cfg: PlotmanConfig):
-    try:
-        # sending post request and saving response as response object
-        payload = json.dumps(dp)
-        requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
-        # print(r.text)
-    except ValueError as e:
-        print('The Connection err ---> ', e)
+    # sending post request and saving response as response object
+    payload = json.dumps(dp)
+    requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
+
 
 """
 
