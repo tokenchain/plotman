@@ -109,7 +109,7 @@ def maybe_start_new_plot(dir_cfg: Directories, sched_cfg: Scheduling, plotting_c
     if psutil.cpu_percent(interval=10) > 99:
         return (False, 'cpu optimized!')
 
-    jobs = job.Job.get_running_jobs(dir_cfg.log)
+    jobs = job.Job.genTasks(dir_cfg.log)
 
     wait_reason = None  # If we don't start a job this iteration, this says why.
 

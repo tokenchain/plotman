@@ -71,3 +71,4 @@ util/installmaster
 util/installnvme
 util/listlogs
 util/plotcopy
+util/startnode

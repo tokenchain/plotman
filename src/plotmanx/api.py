@@ -25,7 +25,7 @@ class PlotmanCollector:
 
     def collect(self):
         cfg = configuration.get_validated_configs()
-        jobs = Job.get_running_jobs(cfg.directories.log)
+        jobs = Job.genTasks(cfg.directories.log)
         count = len(sorted(jobs, key=job.Job.get_time_wall))
         yield GaugeMetricFamily("plotman_jobs_count", "Number of plotting jobs running", value=count)
 

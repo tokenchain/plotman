@@ -9,9 +9,11 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -193,7 +195,11 @@ var KB = uint64(1024)
 
 func main() {
 	var wg sync.WaitGroup
-
+	runtime.GOMAXPROCS(4)
+	// pid, _, _ := syscall.Syscall(syscall.SYS_GETPID, 0, 0, 0)
+	pid := syscall.Getpid()
+	fmt.Println("process id: ", pid)
+	syscall.Setpriority(syscall.PRIO_PROCESS, int(pid), 2)
 	if len(os.Args) < 4 {
 		fmt.Printf("usage: %s source destination BUFFERSIZE logfile(optional) \n", filepath.Base(os.Args[0]))
 		return

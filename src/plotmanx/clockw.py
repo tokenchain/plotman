@@ -54,10 +54,10 @@ class MintJ:
 
     def GenJobs(self, dir_cfg: Directories):
         self.dir_cfg_x = dir_cfg
-        self.jobs = Job.get_running_jobs(dir_cfg.log)
+        self.jobs = Job.genTasks(dir_cfg.log)
 
     def CacheGenJobs(self, dir_cfg: Directories):
-        self.jobs = Job.get_running_jobs(dir_cfg.log, cached_jobs=self.jobs)
+        self.jobs = Job.genTasks(dir_cfg.log, cached_jobs=self.jobs)
 
     @property
     def WaitLog(self) -> str:
@@ -126,7 +126,7 @@ class MintJ:
                              '-r', str(self.plotcfg_x.n_threads),
                              '-u', str(self.plotcfg_x.n_buckets),
                              '-b', str(self.plotcfg_x.job_buffer),
-                             '-n64',
+                             '-n 32',
                              '-t', tmpdir,
                              '-d', tmpdir]
 

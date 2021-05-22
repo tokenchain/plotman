@@ -88,10 +88,14 @@ class Job:
     last_updated_time_in_min = 0
 
     @staticmethod
-    def get_running_jobs(logroot, cached_jobs=()) -> list:
-        '''Return a list of running plot jobs.  If a cache of preexisting jobs is provided,
-           reuse those previous jobs without updating their information.  Always look for
-           new jobs not already in the cache.'''
+    def genTasks(logroot, cached_jobs=()) -> list:
+        """
+        Return a list of running plot jobs.  If a cache of preexisting jobs is provided,
+        reuse those previous jobs without updating their information.  Always look for
+        new jobs not already in the cache. If the job status is already finish or the storage
+        is Zero then we need to make new
+        job scanning
+        """
         jobs = []
         cached_jobs_by_pid = {j.proc.pid: j for j in cached_jobs}
 
@@ -101,12 +105,21 @@ class Job:
             with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
                 if is_plotting_cmdline(proc.cmdline()):
                     if proc.pid in cached_jobs_by_pid.keys():
-                        jobs.append(cached_jobs_by_pid[proc.pid])  # Copy from cache
+                        cached_job = cached_jobs_by_pid[proc.pid]
+                        if cached_job.get_tmp_usage() == 0:
+                            try:
+                                job1 = Job(proc, logroot)
+                                if not job1.help:
+                                    jobs.append(job1)
+                            except Exception as e:
+                                jobs.append(cached_job)
+                        else:
+                            jobs.append(cached_job)
                     else:
                         try:
-                            job = Job(proc, logroot)
-                            if not job.help:
-                                jobs.append(job)
+                            job2 = Job(proc, logroot)
+                            if not job2.help:
+                                jobs.append(job2)
                         except Exception as e:
                             print("Error:", e)
                             pass
@@ -281,7 +294,7 @@ class Job:
         else:
             self.phase = (0, 0)
 
-    def check_freeze(self):
+    def check_freeze(self) -> None:
         assert self.logfile
         updatedAt = os.path.getmtime(self.logfile)
         now = datetime.now().timestamp()
@@ -291,11 +304,11 @@ class Job:
         '''Return a 2-tuple with the job phase and subphase (by reading the logfile)'''
         return self.phase
 
-    def plot_id_prefix(self):
+    def plot_id_prefix(self) -> str:
         return self.plot_id[:8]
 
     # TODO: make this more useful and complete, and/or make it configurable
-    def status_str_long(self):
+    def status_str_long(self) -> str:
         return '{plot_id}\nk={k} r={r} b={b} u={u}\npid:{pid}\ntmp:{tmp}\ntmp2:{tmp2}\ndst:{dst}\nlogfile:{logfile}'.format(
             plot_id=self.plot_id,
             k=self.k,
@@ -313,7 +326,7 @@ class Job:
     def get_mem_usage(self):
         return self.proc.memory_info().vms  # Total, inc swapped
 
-    def get_tmp_usage(self):
+    def get_tmp_usage(self) -> int:
         total_bytes = 0
         with os.scandir(self.tmpdir) as it:
             for entry in it:
@@ -325,7 +338,7 @@ class Job:
                         pass
         return total_bytes
 
-    def get_run_status(self):
+    def get_run_status(self) -> str:
         '''Running, suspended, etc.'''
         status = self.proc.status()
         if status == psutil.STATUS_RUNNING:
@@ -339,21 +352,21 @@ class Job:
         else:
             return self.proc.status()
 
-    def get_time_wall(self):
+    def get_time_wall(self) -> int:
         create_time = datetime.fromtimestamp(self.proc.create_time())
         return int((datetime.now() - create_time).total_seconds())
 
-    def get_time_user(self):
+    def get_time_user(self) -> int:
         return int(self.proc.cpu_times().user)
 
-    def get_time_sys(self):
+    def get_time_sys(self) -> int:
         return int(self.proc.cpu_times().system)
 
-    def get_time_iowait(self):
+    def get_time_iowait(self) -> int:
         cpu_times = self.proc.cpu_times()
         iowait = getattr(cpu_times, 'iowait', None)
         if iowait is None:
-            return None
+            return 0
 
         return int(iowait)
 

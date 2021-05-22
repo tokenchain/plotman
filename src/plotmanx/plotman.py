@@ -131,12 +131,12 @@ def plotting(cfg: PlotmanConfig):
 def archivePlots(cfg: any):
     print('...starting archive loop')
     firstit = True
-    jobs = Job.get_running_jobs(cfg.directories.log)
+    jobs = Job.genTasks(cfg.directories.log)
     while True:
         if not firstit:
             print('Sleeping 60s until next iteration...')
             time.sleep(60)
-            jobs = Job.get_running_jobs(cfg.directories.log)
+            jobs = Job.genTasks(cfg.directories.log)
         firstit = False
         archiving_status, log_message = archive.spawn_archive_process_rsync(cfg.directories, jobs)
         if log_message:
@@ -208,7 +208,7 @@ def main():
                          args.bytmp, args.bybitfield)
 
     else:
-        jobs = Job.get_running_jobs(cfg.directories.log)
+        jobs = Job.genTasks(cfg.directories.log)
 
         # Status report
         if args.cmd == 'status':
