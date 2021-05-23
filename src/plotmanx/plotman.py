@@ -196,8 +196,6 @@ def main():
     #
     if args.cmd == 'plot':
         plotting(cfg)
-        # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        #    executor.submit(plotting, cfg)
 
     #
     # Analysis of completed jobs

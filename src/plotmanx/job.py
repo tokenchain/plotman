@@ -233,6 +233,7 @@ class Job:
         # (and being slow about it).  In this case, use the last metadata change as the start time.
         # TODO: we never come back to this; e.g. plot_id may remain uninitialized.
         # TODO: should we just use the process start time instead?
+
         if not found_log:
             self.start_time = datetime.fromtimestamp(os.path.getctime(self.logfile))
 
@@ -304,6 +305,7 @@ class Job:
         '''Return a 2-tuple with the job phase and subphase (by reading the logfile)'''
         return self.phase
 
+    @property
     def plot_id_prefix(self) -> str:
         return self.plot_id[:8]
 
@@ -415,7 +417,7 @@ def report_jdata(jobs, tmp_prefix='', dst_prefix='') -> list:
     for i, j in enumerate(sorted(jobs, key=job.Job.get_time_wall)):
         with j.proc.oneshot():
             dictionary = {
-                'plotid': j.plot_id[:8],
+                'plotid': j.plot_id_prefix,
                 'k': j.k,
                 'tmp': abbr_path(j.tmpdir, tmp_prefix),
                 'dst': abbr_path(j.dstdir, dst_prefix),

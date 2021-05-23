@@ -97,7 +97,7 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
         n_end_rows = n_rows - n_begin_rows
 
     tab = tt.Texttable()
-    headings = ['plot id', 'k', 'tmp', 'dst', 'wall', 'phase', 'tmp', 'pid', 'stat', 'mem', 'user', 'sys', 'io', 'freezed', 'logfile']
+    headings = ['plot id', 'k', 'tmp', 'dst', 'wall', 'phase', 'tpsize', 'pid', 'stat', 'mem', 'user', 'sys', 'io', 'freezed', 'logfile']
     headingwidth = len(headings)
     if height:
         headings.insert(0, '#')
@@ -117,7 +117,7 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
         else:
             try:
                 with j.proc.oneshot():
-                    row = [j.plot_id[:8],
+                    row = [j.plot_id_prefix,
                            j.k,
                            abbr_path(j.tmpdir, tmp_prefix),
                            abbr_path(j.dstdir, dst_prefix),
@@ -135,7 +135,7 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
                            ]
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 # In case the job has disappeared
-                row = [j.plot_id[:8]] + (['--'] * (headingwidth - 1))
+                row = [j.plot_id_prefix] + (['--'] * (headingwidth - 1))
 
             if height:
                 row.insert(0, '%3d' % i)
@@ -245,7 +245,7 @@ def jsondata(jobs, tmp_prefix='', dst_prefix='') -> list:
     for i, j in enumerate(sorted(jobs, key=job.Job.get_time_wall)):
         with j.proc.oneshot():
             dictionary = {
-                'plotid': j.plot_id[:8],
+                'plotid': j.plot_id_prefix,
                 'k': j.k,
                 'tmp': abbr_path(j.tmpdir, tmp_prefix),
                 'dst': abbr_path(j.dstdir, dst_prefix),
