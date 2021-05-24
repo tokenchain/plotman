@@ -80,7 +80,7 @@ class MainHandler(web.RequestHandler):
                            );''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS plot (
-                           plotid text PRIMARY KEY,
+                           plotid text NOT NUL,
                            k INTEGER NOT NULL,
                            r INTEGER NOT NULL,
                            b INTEGER NOT NULL,
@@ -141,11 +141,11 @@ INSERT INTO sysio (ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_per
             {float(j['disk_percent'])},
             {float(j['iowait_percent'])},
             {float(j['memory_percent'])},
-            {int(j['net_read_mb_s'])},
-            {int(j['net_write_mb_s'])},
-            {int(j['disk_read_mb_s'])},
-            {int(j['disk_write_mb_s'])},
-            {int(j['net_fds'])},
+            {commaInt(j['net_read_mb_s'])},
+            {commaInt(j['net_write_mb_s'])},
+            {commaInt(j['disk_read_mb_s'])},
+            {commaInt(j['disk_write_mb_s'])},
+            {commaInt(j['net_fds'])},
             '{j['version']}',
             {int(j['stamp'])},
 )
@@ -157,6 +157,10 @@ INSERT INTO sysio (ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_per
 
         print("Test 1 --------")
         print(j['version'])
+
+
+def commaInt(x: str) -> int:
+    return int(x.replace(',', ''))
 
 
 def apiOpen(cfg: PlotmanConfig):
