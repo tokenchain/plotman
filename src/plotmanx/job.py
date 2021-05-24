@@ -13,17 +13,17 @@ from . import plot_util
 from .reporting import abbr_path, phase_str
 
 
-def job_phases_for_tmpdir(d, all_jobs):
+def job_phases_for_tmpdir(d, all_jobs) -> list:
     '''Return phase 2-tuples for jobs running on tmpdir d'''
     return sorted([j.progress() for j in all_jobs if j.tmpdir == d])
 
 
-def job_phases_for_dstdir(d, all_jobs):
+def job_phases_for_dstdir(d, all_jobs) -> list:
     '''Return phase 2-tuples for jobs outputting to dstdir d'''
     return sorted([j.progress() for j in all_jobs if j.dstdir == d])
 
 
-def is_plotting_cmdline(cmdline):
+def is_plotting_cmdline(cmdline) -> bool:
     return (
             len(cmdline) >= 4
             and 'python' in cmdline[0]
@@ -31,14 +31,6 @@ def is_plotting_cmdline(cmdline):
             and 'plots' == cmdline[2]
             and 'create' == cmdline[3]
     )
-
-
-def is_plot_moving(cmdline):
-    return (
-            len(cmdline) > 3
-            and cmdline[0].endswith('plmo')
-    )
-
 
 # This is a cmdline argument fix for https://github.com/ericaltendorf/plotman/issues/41
 def cmdline_argfix(cmdline):
@@ -126,18 +118,7 @@ class Job:
 
         return jobs
 
-    @staticmethod
-    def get_running_moving_jobs() -> list:
-        jobs = []
 
-        for proc in psutil.process_iter(['pid', 'cmdline']):
-            # Ignore processes which most likely have terminated between the time of iteration and data access.
-            with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
-                if is_plot_moving(proc.cmdline()):
-                    job = " ".join(proc.cmdline())
-                    jobs.append(job)
-
-        return jobs
 
     def __init__(self, proc, logroot):
         '''Initialize from an existing psutil.Process object.  must know logroot in order to understand open files'''

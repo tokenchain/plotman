@@ -19,6 +19,7 @@ nvmecc/farming.log
 nvmecc/ff.log
 nvmecc/go.mod
 nvmecc/nohup.out
+nvmecc/nvme_linux_0.4.88.zip
 nvmecc/stockup
 nvmecc/stop
 nvmecc/testrun.sh

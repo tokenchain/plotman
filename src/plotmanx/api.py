@@ -51,7 +51,7 @@ class MainHandler(web.RequestHandler):
         remote_addr = os.environ.get('REMOTE_ADDR', '-')
         ts = datetime.now().strftime('%m-%d %H:%M:%S')
 
-        con = sqlite3.connect(get_db_path)
+        con = sqlite3.connect(get_db_path())
         cur = con.cursor()
 
         cur.execute('''CREATE TABLE IF NOT EXISTS systemchia (

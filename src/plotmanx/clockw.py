@@ -9,6 +9,7 @@ import pkg_resources
 import psutil
 
 from .configuration import Scheduling, Directories, Plotting
+from .farmplot import FarmPlot
 from .job import Job, job_phases_for_tmpdir
 from .manager import phases_permit_new_job
 
@@ -206,7 +207,8 @@ class MintJ:
         count1 = len(glob.glob1("/mnt/local/tmp", "*.plot"))
         count2 = len(glob.glob1("/mnt/local/temp", "*.plot"))
 
-        listplmo = Job.get_running_moving_jobs()
+        listplmo = FarmPlot.get_running_moving_jobs()
+        nfslist = FarmPlot.get_nfs_details()
 
         disk = psutil.disk_io_counters()
         disk_bytes_read, disk_bytes_write = disk.read_bytes, disk.write_bytes
@@ -223,6 +225,7 @@ class MintJ:
             plotcount=count1 + count2,
             movingcount=len(listplmo),
             movingdetail=listplmo,
+            nfsips=nfslist,
             cpucount=psutil.cpu_count(),
             stamp=int(datetime.datetime.now().timestamp()),
             version=pkg_resources.get_distribution('plotmanx').version,
