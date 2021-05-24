@@ -1,14 +1,20 @@
 #!/usr/bin/python
 #
-import json
+
 import os
 import sqlite3
+import urllib
 from datetime import datetime
 
 import requests
 from tornado import web, ioloop, httpserver
 
 from .configuration import PlotmanConfig, get_db_path
+
+try:
+    import simplejson as json
+except ImportError:
+    import json
 
 
 def PostDat(dp: dict, cfg: PlotmanConfig):
@@ -38,15 +44,18 @@ if __name__ == "__main__":
 
 
 class MainHandler(web.RequestHandler):
-    def prepare(self):
-        if self.request.headers.get("Content-Type", "").startswith("application/json"):
-            self.json_args = json.loads(self.request.body)
-        else:
-            self.json_args = None
+    def initialize(self, *args, **kwargs):
+        self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
+        self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
 
     def post(self):
         self.set_header("Content-Type", "text/plain")
-        req_body = self.json_args
+        req_body = self.request.body
+        jsondata = dict()
+        try:
+            jsondata = json.loads(req_body)
+        except:
+            jsondata = json.loads(urllib.unquote_plus(req_body))
 
         remote_addr = os.environ.get('REMOTE_ADDR', '-')
         ts = datetime.now().strftime('%m-%d %H:%M:%S')
@@ -60,11 +69,13 @@ class MainHandler(web.RequestHandler):
                            ip text NOT NULL
                    );''')
 
-        # Insert a row of data
-        cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{remote_addr}')")
+        if req_body is not None:
+            # Insert a row of data
+            cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{remote_addr}')")
+
         con.commit()
         con.close()
-        print(req_body)
+        print(jsondata)
 
 
 def apiOpen(cfg: PlotmanConfig):
