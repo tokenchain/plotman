@@ -203,7 +203,7 @@ class Job:
                         # Mon Nov  2 08:39:53 2020
                         self.start_time = parse_chia_plot_time(m.group(1))
                         found_log = True
-                        break  # Stop reading lines in file
+                        # continue and looking for the last occurance
 
             if found_id and found_log:
                 break  # Stop trying
