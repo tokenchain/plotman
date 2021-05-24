@@ -128,7 +128,8 @@ class MainHandler(web.RequestHandler):
                 print("body is not empty")
 
             content_insert = f"""
-INSERT INTO sysio (ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_percent,swap_percent,disk_percent,iowait_percent,memory_percent,net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,cpu_usage,net_fds,version,stamp
+INSERT INTO sysio (
+ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_percent,swap_percent,disk_percent,iowait_percent,memory_percent,net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,cpu_usage,net_fds,version,stamp
 ) VALUES(
             '{remote_ip}',
             {int(j['plotcount'])},
@@ -147,7 +148,7 @@ INSERT INTO sysio (ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_per
             {commaInt(j['disk_write_mb_s'])},
             {commaInt(j['net_fds'])},
             '{j['version']}',
-            {int(j['stamp'])},
+            {int(j['stamp'])}
 )
                               """
             cur.execute(content_insert)
