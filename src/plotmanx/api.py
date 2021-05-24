@@ -69,12 +69,16 @@ class MainHandler(web.RequestHandler):
 
         if req_body is not None:
             # Insert a row of data
-            cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{self.remote_ip}')")
+            # cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{self.remote_ip}')")
+            print("body is not empty")
 
         con.commit()
         con.close()
 
+
+        print("Test 1 --------")
         print(jsondata)
+        print("Test 2 --------")
         print(req_body)
 
 
