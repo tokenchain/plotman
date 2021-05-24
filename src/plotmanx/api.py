@@ -80,7 +80,7 @@ class MainHandler(web.RequestHandler):
                            );''')
 
         c.execute('''CREATE TABLE IF NOT EXISTS plot (
-                           plotid text NOT NUL,
+                           plotid text PRIMARY KEY,
                            k INTEGER NOT NULL,
                            r INTEGER NOT NULL,
                            b INTEGER NOT NULL,
