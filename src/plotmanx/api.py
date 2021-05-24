@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #
 
-import os
 import sqlite3
 import urllib
 from datetime import datetime
@@ -57,7 +56,6 @@ class MainHandler(web.RequestHandler):
         except:
             jsondata = json.loads(urllib.unquote_plus(req_body))
 
-        remote_addr = os.environ.get('REMOTE_ADDR', '-')
         ts = datetime.now().strftime('%m-%d %H:%M:%S')
 
         con = sqlite3.connect(get_db_path())
@@ -71,11 +69,13 @@ class MainHandler(web.RequestHandler):
 
         if req_body is not None:
             # Insert a row of data
-            cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{remote_addr}')")
+            cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{self.remote_ip}')")
 
         con.commit()
         con.close()
+
         print(jsondata)
+        print(req_body)
 
 
 def apiOpen(cfg: PlotmanConfig):
