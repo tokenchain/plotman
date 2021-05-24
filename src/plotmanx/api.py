@@ -114,13 +114,16 @@ class MainHandler(web.RequestHandler):
             # cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{self.remote_ip}')")
 
             if len(j['jobls']) > 0:
-                for h in j['jobls']:
-                    content_insert = f"""
-                        INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
-                        VALUES '{h['plot_id']}', '{int(h['k'])}', '{int(h['r'])}', '{int(h['b'])}', '{int(h['u'])}', '{int(h['pid'])}', '{remote_ip}', '{ts}' 
-                        WHERE NOT EXISTS (SELECT plotid FROM plot WHERE plotid = '{h['plot_id']}';
-                    """
-                    cur.execute(content_insert)
+                try:
+                    for h in j['jobls']:
+                        content_insert = f"""
+                            INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
+                            VALUES '{h['plot_id']}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{remote_ip}', '{ts}' 
+                           ;
+                        """
+                        cur.execute(content_insert)
+                except sqlite3.OperationalError as r:
+                    print(f"there is a things that doesnt work. {r}")
             else:
                 print("body is not empty")
 
@@ -148,7 +151,6 @@ INSERT INTO sysio (ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_per
 )
                               """
             cur.execute(content_insert)
-
 
         con.commit()
         con.close()
