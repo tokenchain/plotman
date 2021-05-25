@@ -4,7 +4,7 @@ import os
 import pytest
 from plotmanx import resources
 
-from src.plotmanx.analyze.pri import LogFile
+from ..analyze.pri import LogFile
 
 
 @pytest.fixture(name='logfile_path')

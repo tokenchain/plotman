@@ -14,7 +14,7 @@ from .farmplot import FarmPlot
 from .job import Job, job_phases_for_tmpdir
 from .manager import phases_permit_new_job
 # Plotman libraries
-from src.plotmanx.util.plot_util import getIP
+from .util.plot_util import getIP
 
 MIN = 60  # Seconds
 HR = 3600  # Seconds

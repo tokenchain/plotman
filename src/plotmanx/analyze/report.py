@@ -4,7 +4,7 @@ import statistics
 
 import texttable as tt
 
-from src.plotmanx.util import plot_util
+from ..util import plot_util
 
 
 def analyze(logfilenames, clipterminals, bytmp, bybitfield):
