@@ -136,11 +136,13 @@ class NodeHandle(web.RequestHandler):
                         """
 
                         (n,) = cur.execute(content_find).fetchone()
-                        print(n)
                         if int(n) == 0:
                             content_insert = f"""
                                 INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
-                                VALUES '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}' 
+                                VALUES (
+                                '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])},
+                                {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}'
+                                )
                                ;
                             """
 
