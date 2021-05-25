@@ -127,8 +127,8 @@ class NodeHandle(web.RequestHandler):
 
                         plotid = h['plot_id']
 
-                        if len(plotid) > 8:
-                            plotid = h['plot_id'][:8]
+#                        if len(plotid) > 8:
+#                            plotid = h['plot_id'][:8]
 
                         content_insert = f"""
                             INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
