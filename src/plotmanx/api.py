@@ -104,7 +104,11 @@ class NodeHandle(web.RequestHandler):
             print("error from decoding json file.")
             return
 
-        ipremo = j['identity']
+        try:
+            ipremo = j['identity']
+        except:
+            ipremo = remote_ip
+
         ts = datetime.now().strftime('%m-%d %H:%M:%S')
 
         con = sqlite3.connect(get_db_path())
@@ -166,6 +170,7 @@ net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,net_fds,version,stam
 
 def commaInt(x: str) -> int:
     return int(x.replace(',', ''))
+
 
 def start_master_api_node(cfg: PlotmanConfig):
     try:
