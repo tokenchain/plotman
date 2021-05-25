@@ -129,6 +129,7 @@ class NodeHandle(web.RequestHandler):
                            ;
                         """
                         cur.execute(content_insert)
+                        print(f"ID - {h['plot_id']}")
                 except sqlite3.OperationalError as r:
                     print(f"there is a things that doesnt work. {r}")
             else:
