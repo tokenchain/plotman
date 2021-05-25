@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime
 from sqlite3 import Cursor
 
+import pkg_resources
 import requests
 from tornado import web, ioloop, httpserver
 
@@ -174,7 +175,9 @@ def commaInt(x: str) -> int:
 
 def start_master_api_node(cfg: PlotmanConfig):
     try:
-        print(f"api port {cfg.apis.port} is now listening")
+        version = pkg_resources.get_distribution('plotmanx').version,
+        print(f"Now plotman API - v{version}")
+        print(f"API running port {cfg.apis.port} is now listening.. ")
         application = web.Application([(r"/report", NodeHandle)])
         http_server = httpserver.HTTPServer(application)
         http_server.listen(cfg.apis.port)
