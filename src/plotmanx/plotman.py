@@ -10,7 +10,7 @@ from shutil import copyfile
 # Plotman libraries
 from marshmallow import ValidationError
 
-from . import analyzer, archive, configuration, interactive, manager, reporting
+from . import analyze, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
 from .analyze.report import analyze
 from .api import start_master_api_node, PostDat
@@ -99,7 +99,7 @@ def plotting(cfg: PlotmanConfig):
         try:
             print(f"s{cfg.scheduling.polling_time_s}\n")
             time.sleep(cfg.scheduling.polling_time_s)
-
+            
             minp.GenJobs(cfg.directories)
             minp.Upcfg(cfg.scheduling, cfg.plotting)
 

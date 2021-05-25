@@ -24,3 +24,7 @@ class MissingImportError(Exception):
 
 class TerminationException(Exception):
     pass
+
+
+class TerminalTooSmallError(Exception):
+    pass

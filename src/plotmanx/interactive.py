@@ -7,10 +7,7 @@ import subprocess
 
 from . import archive, configuration, reporting
 from .clockwork import MintJ
-
-
-class TerminalTooSmallError(Exception):
-    pass
+from .err import TerminalTooSmallError
 
 
 class Log:
