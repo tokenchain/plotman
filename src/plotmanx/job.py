@@ -273,7 +273,8 @@ class Job:
 
     def toJson(self) -> dict:
         return dict(
-            plot_id=self.zLogFile.getPlotIdFull,
+            plot_id=self.zLogFile.getPlotIdShort,
+            plot_idf=self.zLogFile.getPlotIdFull,
             k=self.k,
             r=self.r,
             b=self.b,

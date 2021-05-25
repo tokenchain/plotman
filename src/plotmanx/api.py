@@ -123,13 +123,22 @@ class NodeHandle(web.RequestHandler):
 
                 try:
                     for h in j['jobls']:
+
+                        plotid = h['plot_id']
+
+                        if len(plotid) > 8:
+                            plotid = h['plot_id'][:8]
+
                         content_insert = f"""
                             INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
-                            VALUES '{h['plot_id']}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}' 
+                            VALUES '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}' 
                            ;
                         """
+
                         cur.execute(content_insert)
-                        print(f"ID - {h['plot_id']}")
+
+                        print(f"ID - {plotid}")
+
                 except sqlite3.OperationalError as r:
                     print(f"there is a things that doesnt work. {r}")
             else:
@@ -176,7 +185,7 @@ def commaInt(x: str) -> int:
 
 def start_master_api_node(cfg: PlotmanConfig):
     try:
-        version = pkg_resources.get_distribution('plotmanx').version,
+        version = pkg_resources.get_distribution('plotmanx').version
         print(f"Now plotman API - v{version}")
         print(f"API running port {cfg.apis.port} is now listening.. ")
         application = web.Application([(r"/report", NodeHandle)])
