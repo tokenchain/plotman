@@ -5,7 +5,7 @@ from datetime import datetime
 
 import psutil
 
-from . import job
+
 from . import plot_util
 from .analyzer import LogFile
 from .reporting import abbr_path, phase_str
@@ -297,7 +297,7 @@ class Job:
 
 def report_jdata(jobs, tmp_prefix='', dst_prefix='') -> list:
     jobsr = list()
-    for i, j in enumerate(sorted(jobs, key=job.Job.get_time_wall)):
+    for i, j in enumerate(sorted(jobs, key=Job.get_time_wall)):
         with j.proc.oneshot():
             dictionary = {
                 'plotid': j.plot_id_prefix,

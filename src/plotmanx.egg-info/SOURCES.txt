@@ -71,6 +71,7 @@ src/plotmanx/_tests/resources/2021-05-07T20_25_52.851358+08_00.log
 src/plotmanx/_tests/resources/__init__.py
 src/plotmanx/resources/__init__.py
 src/plotmanx/resources/plotman.yaml
+util/installclient
 util/installmaster
 util/installnvme
 util/listlogs

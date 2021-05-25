@@ -131,7 +131,7 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
                            plot_util.time_format(j.get_time_sys()),
                            plot_util.time_format(j.get_time_iowait()),
                            plot_util.is_freezed(j),
-                           os.path.basename(j.logfile)
+                           os.path.basename(j.logfilePath)
                            ]
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 # In case the job has disappeared
