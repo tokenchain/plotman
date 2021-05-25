@@ -6,7 +6,7 @@ import os
 import subprocess
 
 from . import archive, configuration, reporting
-from .clockw import MintJ
+from .clockwork import MintJ
 
 
 class TerminalTooSmallError(Exception):

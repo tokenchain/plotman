@@ -66,10 +66,11 @@ src/plotmanx/_tests/reporting_test.py
 src/plotmanx/_tests/resources/2021-04-04-19:00:47.log
 src/plotmanx/_tests/resources/2021-04-04-19:00:47.notes
 src/plotmanx/_tests/resources/2021-04-04T19_00_47.681088-0400.log
+src/plotmanx/_tests/resources/2021-05-07T20_25_52.841358+08_00 2.log
+src/plotmanx/_tests/resources/2021-05-07T20_25_52.851358+08_00.log
 src/plotmanx/_tests/resources/__init__.py
 src/plotmanx/resources/__init__.py
 src/plotmanx/resources/plotman.yaml
-util/install
 util/installmaster
 util/installnvme
 util/listlogs

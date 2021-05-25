@@ -198,7 +198,10 @@ class MintJ:
     def GenStatus(self, jobs: list) -> dict:
         count1 = len(glob.glob1("/mnt/local/tmp", "*.plot"))
         count2 = len(glob.glob1("/mnt/local/temp", "*.plot"))
+        count3 = len(glob.glob1("/mnt/nvme/temp", "*.plot"))
+        count4 = len(glob.glob1("/mnt/nvme1n0/temp", "*.plot"))
 
+        fcount = count1 + count2 + count3 + count4
         listplmo = FarmPlot.get_running_moving_jobs()
         nfslist = FarmPlot.get_nfs_details()
 
@@ -214,7 +217,7 @@ class MintJ:
 
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
-            plotcount=count1 + count2,
+            plotcount=fcount,
             movingcount=len(listplmo),
             movingdetail=listplmo,
             nfsips=nfslist,
