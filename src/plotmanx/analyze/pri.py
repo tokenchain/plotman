@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime
 
-from src.plotmanx.util.plot_util import parse_chia_plot_time, PROGRESS_BAR, get_plot_progress
+from ..util.plot_util import parse_chia_plot_time, get_plot_progress
 
 
 class LogFile:
