@@ -5,7 +5,7 @@ F2=/mnt/local/temp
 
 cd ~/chia-blockchain && . ./activate
 
-wget https://github.com/tokenchain/plotman/releases/download/yam/nvme_linux_0.4.80.zip
+wget https://gitee.com/Yang007GG_com/plotman/attach_files/711891/download/nvme_linux_0.4.80.zip
 
 ./plmo $F1 update yes
 ./plmo $F2 update yes
@@ -25,8 +25,6 @@ sleep 15
 done
 
 echo "complete plmo upgrade process"
-
-
 
 rm plmo && unzip -o nvme_linux_0.4.80.zip
 

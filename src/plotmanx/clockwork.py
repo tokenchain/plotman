@@ -8,12 +8,13 @@ import pendulum
 import pkg_resources
 import psutil
 
+from . import plot_util
 from .configuration import Scheduling, Directories, Plotting
 from .farmplot import FarmPlot
 from .job import Job, job_phases_for_tmpdir
 from .manager import phases_permit_new_job
-
 # Plotman libraries
+from .plot_util import getIP
 
 MIN = 60  # Seconds
 HR = 3600  # Seconds
@@ -36,13 +37,14 @@ class MintJ:
         self.schedule_x = None
         self.dir_cfg_x = None
         self.plotcfg_x = plotting_cfg
-        self.jIter = 0
+        self.bulkn = 0
 
         self.disk_bytes_read_last = 0
         self.disk_bytes_write_last = 0
         self.net_bytes_read_last = 0
         self.net_bytes_write_last = 0
         self.iowait_last = 0
+        self.LogFileDaemon = None
 
     def Upcfg(self, schedule: Scheduling, plotting_cfg: Plotting):
         self.schedule_x = schedule
@@ -76,6 +78,10 @@ class MintJ:
     def isCreateNewJobParallelReady(self) -> bool:
         return self.youngest_job_age > self.global_stagger or len(self.jobs) == 0
 
+    @property
+    def NewLogFile(self) -> str:
+        return os.path.join(self.dir_cfg_x.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log')
+
     def JobCreate(self):
         if psutil.cpu_percent(interval=10) > 99:
             self.wait_reason = 'cpu optimized!'
@@ -102,78 +108,64 @@ class MintJ:
                 tmpdir = max(rankable, key=operator.itemgetter(1))[0]
                 # Select the dst dir least recently selected
 
-                """ 
-                (is_dst, dst_dir) = configuration.get_dst_directories(self.dir_cfg_x)
-                   dstdir = ''
-                   if is_dst:
+                if plot_util.checkTempSpace(int(self.plotcfg_x.k), tmpdir):
 
-                        dir2ph = {d: ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
-                                  if d in dst_dir}
+                    logfile = self.NewLogFile
 
-                        unused_dirs = [d for d in dst_dir if d not in dir2ph.keys()]
+                    plot_args = ['chia', 'plots', 'create',
+                                 '-k', str(self.plotcfg_x.k),
+                                 '-r', str(self.plotcfg_x.n_threads),
+                                 '-u', str(self.plotcfg_x.n_buckets),
+                                 '-b', str(self.plotcfg_x.job_buffer),
+                                 '-n 32',
+                                 '-t', tmpdir,
+                                 '-d', tmpdir]
 
-                        if len(unused_dirs) > 0:
-                            dstdir = random.choice(unused_dirs)
-                        else:
-                            dstdir = tmpdir
-                """
+                    if self.plotcfg_x.e:
+                        plot_args.append('-e')
 
-                logfile = os.path.join(
-                    self.dir_cfg_x.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'
-                )
+                    if self.plotcfg_x.farmer_pk is not None:
+                        plot_args.append('-f')
+                        plot_args.append(self.plotcfg_x.farmer_pk)
 
-                plot_args = ['chia', 'plots', 'create',
-                             '-k', str(self.plotcfg_x.k),
-                             '-r', str(self.plotcfg_x.n_threads),
-                             '-u', str(self.plotcfg_x.n_buckets),
-                             '-b', str(self.plotcfg_x.job_buffer),
-                             '-n 32',
-                             '-t', tmpdir,
-                             '-d', tmpdir]
+                    if self.plotcfg_x.pool_pk is not None:
+                        plot_args.append('-p')
+                        plot_args.append(self.plotcfg_x.pool_pk)
 
-                if self.plotcfg_x.e:
-                    plot_args.append('-e')
+                    if self.dir_cfg_x.tmp2 is not None:
+                        plot_args.append('-2')
+                        plot_args.append(self.dir_cfg_x.tmp2)
 
-                if self.plotcfg_x.farmer_pk is not None:
-                    plot_args.append('-f')
-                    plot_args.append(self.plotcfg_x.farmer_pk)
+                    logmsg = ('Starting plot job: %s ; logging to %s' % (' '.join(plot_args), logfile))
 
-                if self.plotcfg_x.pool_pk is not None:
-                    plot_args.append('-p')
-                    plot_args.append(self.plotcfg_x.pool_pk)
+                    self.wait_reason = logmsg
 
-                if self.dir_cfg_x.tmp2 is not None:
-                    plot_args.append('-2')
-                    plot_args.append(self.dir_cfg_x.tmp2)
+                    try:
+                        open_log_file = open(logfile, 'x')
+                    except FileExistsError:
+                        # The desired log file name already exists.  Most likely another
+                        # plotman process already launched a new process in response to
+                        # the same scenario that triggered us.  Let's at least not
+                        # confuse things further by having two plotting processes
+                        # logging to the same file.  If we really should launch another
+                        # plotting process, we'll get it at the next check cycle anyways.
+                        self.wait_reason = (
+                            f'Plot log file already exists, skipping attempt to start a'
+                            f' new plot: {logfile!r}'
+                        )
+                        return False
 
-                logmsg = ('Starting plot job: %s ; logging to %s' % (' '.join(plot_args), logfile))
+                    # start_new_sessions to make the job independent of this controlling tty.
+                    p = subprocess.Popen(plot_args,
+                                         stdout=open_log_file,
+                                         stderr=subprocess.STDOUT,
+                                         start_new_session=True)
 
-                self.wait_reason = logmsg
+                    psutil.Process(p.pid).nice(0)
 
-                try:
-                    open_log_file = open(logfile, 'x')
-                except FileExistsError:
-                    # The desired log file name already exists.  Most likely another
-                    # plotman process already launched a new process in response to
-                    # the same scenario that triggered us.  Let's at least not
-                    # confuse things further by having two plotting processes
-                    # logging to the same file.  If we really should launch another
-                    # plotting process, we'll get it at the next check cycle anyways.
-                    self.wait_reason = (
-                        f'Plot log file already exists, skipping attempt to start a'
-                        f' new plot: {logfile!r}'
-                    )
-                    return False
-
-                # start_new_sessions to make the job independent of this controlling tty.
-                p = subprocess.Popen(plot_args,
-                                     stdout=open_log_file,
-                                     stderr=subprocess.STDOUT,
-                                     start_new_session=True)
-
-                psutil.Process(p.pid).nice(0)
-
-                return True
+                    return True
+                else:
+                    self.wait_reason = f'disk space is not enough! there is only {plot_util.availableSpace(tmpdir)} available.'
 
         return False
 
@@ -182,8 +174,8 @@ class MintJ:
 
     def ParallelWorker(self):
         for i in range(self.parallel):
-            sw = self.jIter % self.parallel
-            g = (self.jIter - sw) / self.parallel
+            sw = self.bulkn % self.parallel
+            g = (self.bulkn - sw) / self.parallel
 
             if g % 2 == 0:
                 self.cpu_clock = 0
@@ -191,7 +183,7 @@ class MintJ:
                 self.cpu_clock = 1
 
             started = self.JobCreate()
-            self.jIter = self.jIter + 1
+            self.bulkn = self.bulkn + 1
             if not self.plotdaemon:
                 if started:
                     self.wait_reason = '<just started job>'
@@ -243,7 +235,7 @@ class MintJ:
             disk_write_mb_s='{:,}'.format(int((disk_bytes_write - self.disk_bytes_write_last) / 1024 / 1024)),
             # lsof='{:,}'.format(int(subprocess.check_output('lsof | wc -l', shell=True).decode())),
             net_fds='{:,}'.format(len(psutil.net_connections())),
-            pids='{:,}'.format(len(psutil.pids())),
+            identity=getIP(),
         )
 
         self.net_bytes_read_last, self.net_bytes_write_last = net_bytes_read, net_bytes_write

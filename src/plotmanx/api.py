@@ -2,7 +2,6 @@
 #
 
 import sqlite3
-import urllib
 from datetime import datetime
 from sqlite3 import Cursor
 
@@ -43,7 +42,7 @@ if __name__ == "__main__":
 """
 
 
-class MainHandler(web.RequestHandler):
+class NodeHandle(web.RequestHandler):
     def initialize(self, *args, **kwargs):
         self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
         self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
@@ -102,8 +101,10 @@ class MainHandler(web.RequestHandler):
         try:
             j = json.loads(req_body)
         except:
-            j = json.loads(urllib.unquote_plus(req_body))
+            print("error from decoding json file.")
+            return
 
+        ipremo = j['identity']
         ts = datetime.now().strftime('%m-%d %H:%M:%S')
 
         con = sqlite3.connect(get_db_path())
@@ -114,11 +115,12 @@ class MainHandler(web.RequestHandler):
             # cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{self.remote_ip}')")
 
             if len(j['jobls']) > 0:
+
                 try:
                     for h in j['jobls']:
                         content_insert = f"""
                             INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
-                            VALUES '{h['plot_id']}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{remote_ip}', '{ts}' 
+                            VALUES '{h['plot_id']}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}' 
                            ;
                         """
                         cur.execute(content_insert)
@@ -133,7 +135,7 @@ ip,plotc,mvplotc,cpu_count,cpu_percent,
 cache_percent,slab_percent,swap_percent,disk_percent,iowait_percent,memory_percent,
 net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,net_fds,version,stamp
 ) VALUES(
-            '{remote_ip}',
+            '{ipremo}',
             {int(j['plotcount'])},
             {int(j['movingcount'])},
             {int(j['cpucount'])},
@@ -158,18 +160,17 @@ net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,net_fds,version,stam
         con.commit()
         con.close()
 
-        print("Test 1 --------")
-        print(j['version'])
+        print("Report data ------")
+        print(f"remote ip: {ipremo} and ver. {j['version']}")
 
 
 def commaInt(x: str) -> int:
     return int(x.replace(',', ''))
 
-
-def apiOpen(cfg: PlotmanConfig):
+def start_master_api_node(cfg: PlotmanConfig):
     try:
         print(f"api port {cfg.apis.port} is now listening")
-        application = web.Application([(r"/report", MainHandler)])
+        application = web.Application([(r"/report", NodeHandle)])
         http_server = httpserver.HTTPServer(application)
         http_server.listen(cfg.apis.port)
         ioloop.IOLoop.current().start()

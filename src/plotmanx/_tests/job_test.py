@@ -48,6 +48,7 @@ with set_locale('C'):
     argnames=['locale_name'],
     argvalues=[['C'], ['en_US.UTF-8'], ['de_DE.UTF-8']],
 )
+
 def test_job_parses_time_with_non_english_locale(logfile_path, locale_name):
     faux_job_with_logfile = FauxJobWithLogfile(logfile_path=logfile_path)
 

@@ -1,14 +1,40 @@
+import fcntl
 import math
 import os
 import re
+import socket
+import struct
+
+import pendulum
 
 GB = 1_000_000_000
+
+KSIZE = {
+    "32": 256.6,
+    "33": 550,
+    "34": 1118,
+    "35": 2335,
+}
 
 
 def df_b(d):
     'Return free space for directory (in bytes)'
     stat = os.statvfs(d)
     return stat.f_frsize * stat.f_bavail
+
+
+def checkTempSpace(knm: int, tmpdir: str) -> bool:
+    for k, v in KSIZE.items():
+        if int(k) == knm:
+            gb_free = df_b(tmpdir) / GB
+            if gb_free > float(v):
+                return True
+    return False
+
+
+def availableSpace(tmpdir: str) -> str:
+    gb_free = df_b(tmpdir) / GB
+    return f"{gb_free} GB"
 
 
 def get_k32_plotsize():
@@ -91,3 +117,21 @@ def column_wrap(items, n_cols, filler=None):
 
 def is_freezed(job):
     return 'YES' if job.last_updated_time_in_min > 60 else 'NO'
+
+
+def parse_chia_plot_time(s):
+    # This will grow to try ISO8601 as well for when Chia logs that way
+    return pendulum.from_format(s, 'ddd MMM DD HH:mm:ss YYYY', locale='en', tz=None)
+
+
+def get_ip_address(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+        s.fileno(),
+        0x8915,  # SIOCGIFADDR
+        struct.pack('256s', ifname[:15])
+    )[20:24])
+
+
+def getIP() -> str:
+    return get_ip_address('eth0')  # '192.168.0.110'

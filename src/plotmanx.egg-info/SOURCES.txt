@@ -32,14 +32,15 @@ nvmecc/temp/writeLock.db
 src/export/csv.py
 src/export/parser.py
 src/export/plotinfo.py
-src/planning/generateconfig.py
+src/planning/jdob.py
+src/planning/nfs.py
 src/plotmanx/__init__.py
 src/plotmanx/__main__.py
 src/plotmanx/analyzer.py
 src/plotmanx/api.py
 src/plotmanx/archive.py
 src/plotmanx/chia.py
-src/plotmanx/clockw.py
+src/plotmanx/clockwork.py
 src/plotmanx/configuration.py
 src/plotmanx/farmplot.py
 src/plotmanx/interactive.py
@@ -55,6 +56,7 @@ src/plotmanx.egg-info/entry_points.txt
 src/plotmanx.egg-info/requires.txt
 src/plotmanx.egg-info/top_level.txt
 src/plotmanx/_tests/__init__.py
+src/plotmanx/_tests/analyze_test.py
 src/plotmanx/_tests/archive_test.py
 src/plotmanx/_tests/configuration_test.py
 src/plotmanx/_tests/job_test.py

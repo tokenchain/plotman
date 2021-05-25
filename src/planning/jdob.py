@@ -7,7 +7,7 @@ import xlsxwriter
 servers = [61, 62, 63, 64, 66, 67, 68, 69, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 storage1 = [236, 237, 238, 239, 240, 241, 242, 243]
 storage2 = [101, 102, 103, 104, 105, 106, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130]
-dst = "/Users/hesdx/Documents/ipfs/deplotplot/workers"
+dst = "/Users/hesdx/Documents/ipfs/deplotplot/workersv2"
 
 c = 0
 
@@ -18,8 +18,8 @@ user_interface:
 directories:
         log: /home/ipant/.chia/mainnet
         tmp:
-                - /mnt/local/tmp
-        tmp2: /mnt/local/tmp
+                - /mnt/nvme/temp
+                - /mnt/nvme0n1/temp
 
         dst:
 {list}
@@ -32,14 +32,14 @@ directories:
                 #index: 0
 scheduling:
         tmpdir_stagger_phase_major: 2
-        tmpdir_stagger_phase_minor: 3
+        tmpdir_stagger_phase_minor: 1
         tmpdir_stagger_phase_limit: 6
-        tmpdir_max_jobs: 40
-        global_max_jobs: 36
+        tmpdir_max_jobs: 45
+        global_max_jobs: 90
         global_stagger_m: [12,18]
         polling_time_s: 30
         parallel: 6
-        
+
 plotting:
         k: 32
         e: True              # Use -e plotting option
@@ -72,8 +72,10 @@ nohup ./plmo /mnt/local/tmp /mnt/nfs/{foldername}/chiaFinalData/ 50000000 &
 upgrade = """
 
 cd ~/chia-blockchain/
-wget https://github.com/tokenchain/plotman/releases/download/evo/plmoflex.zip && unzip -o plmoflex.zip 
-rm plmoflex.zip 
+wget https://gitee.com/Yang007GG_com/plotman/attach_files/711891/download/nvme_linux_0.4.80.zip && unzip -o nvme_linux_0.4.80.zip 
+rm nvme_linux_0.4.80.zip
+
+
 """
 
 
@@ -135,7 +137,7 @@ class ExcelSheetGen:
 
     def dataEnter(self, wid, workerId, folder1, folder2, folder3):
         wtxt = "W{}".format(wid)
-        wkidtxt="192.168.10.{}".format(workerId)
+        wkidtxt = "192.168.10.{}".format(workerId)
         # Some data we want to write to the worksheet.
         self.worksheet.write(self.row, self.col, wtxt)
         self.worksheet.write(self.row, self.col + 1, wkidtxt)

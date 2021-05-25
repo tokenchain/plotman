@@ -1,5 +1,6 @@
 import contextlib
 import glob
+import os
 import re
 from subprocess import Popen, PIPE, STDOUT
 
@@ -64,7 +65,7 @@ class FarmPlot:
 
         return nfs_list
 
-    def start_copyplot_spawn(self):
+    def start_nfs(self) -> None:
 
         count1 = len(glob.glob1("~/chia-blockchain", "plmo"))
         if count1 >= 1:
@@ -77,3 +78,9 @@ class FarmPlot:
                     print(f"E: {output}")
         else:
             print("Did not find the plmo executable.")
+
+    def start_nvme_local_dir(self) -> None:
+        subs = [x[0] for x in os.walk("/mnt")]
+        count2 = len(subs)
+        for rsub in subs:
+            print(rsub)

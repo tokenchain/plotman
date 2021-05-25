@@ -12,8 +12,8 @@ from marshmallow import ValidationError
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
-from .api import apiOpen, PostDat
-from .clockw import MintJ
+from .api import start_master_api_node, PostDat
+from .clockwork import MintJ
 from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
 from .job import Job
@@ -124,7 +124,6 @@ def plotting(cfg: PlotmanConfig):
             print('got IOError from io', io)
             continue
 
-
     print('exit from error unknown...')
 
 
@@ -201,9 +200,7 @@ def main():
     # Analysis of completed jobs
     #
     elif args.cmd == 'analyze':
-
-        analyzer.analyze(args.logfile, args.clipterminals,
-                         args.bytmp, args.bybitfield)
+        analyzer.analyze(args.logfile, args.clipterminals, args.bytmp, args.bybitfield)
 
     else:
         jobs = Job.genTasks(cfg.directories.log)
@@ -220,11 +217,11 @@ def main():
             interactive.run_interactive()
 
         elif args.cmd == 'api':
-            apiOpen(cfg)
+            start_master_api_node(cfg)
 
         elif args.cmd == 'nfs':
             farm = FarmPlot(cfg)
-            farm.start_copyplot_spawn()
+            farm.start_nfs()
 
         # Start running archival
         elif args.cmd == 'archive':
@@ -251,7 +248,7 @@ def main():
                 # TODO: allow multiple idprefixes, not just take the first
                 selected = manager.select_jobs_by_partial_id(jobs, args.idprefix[0])
                 id_spec = args.idprefix[0]
-                if (len(selected) == 0):
+                if len(selected) == 0:
                     print('Error: %s matched no jobs.' % id_spec)
                 elif len(selected) > 1:
                     print('Error: "%s" matched multiple jobs:' % id_spec)
@@ -277,7 +274,7 @@ def main():
                     print('Will kill pid %d, plot id %s' % (job.proc.pid, job.plot_id))
                     print('Will delete %d temp files' % len(temp_files))
                     conf = input('Are you sure? ("y" to confirm): ')
-                    if (conf != 'y'):
+                    if conf != 'y':
                         print('canceled.  If you wish to resume the job, do so manually.')
                     else:
                         print('killing...')
