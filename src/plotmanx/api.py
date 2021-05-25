@@ -127,16 +127,24 @@ class NodeHandle(web.RequestHandler):
 
                         plotid = h['plot_id']
 
-#                        if len(plotid) > 8:
-#                            plotid = h['plot_id'][:8]
+                        #                        if len(plotid) > 8:
+                        #                            plotid = h['plot_id'][:8]
 
-                        content_insert = f"""
-                            INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
-                            VALUES '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}' 
-                           ;
+                        content_find = f"""
+
+                        SELECT COUNT(*) FROM plot WHERE plotid='{plotid}';
                         """
 
-                        cur.execute(content_insert)
+                        n = cur.execute(content_find)
+
+                        if int(n) == 0:
+                            content_insert = f"""
+                                INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
+                                VALUES '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}' 
+                               ;
+                            """
+
+                            cur.execute(content_insert)
 
                         print(f"ID - {plotid}")
 
