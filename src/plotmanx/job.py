@@ -5,7 +5,7 @@ from datetime import datetime
 
 import psutil
 
-from .analyzer import LogFile
+from .analyze.pri import LogFile
 from .reporting import abbr_path, phase_str
 from .util import plot_util
 
