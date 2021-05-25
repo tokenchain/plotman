@@ -81,7 +81,7 @@ class NodeHandle(web.RequestHandler):
 
         c.execute('''CREATE TABLE IF NOT EXISTS plot (
                            pcid INTEGER PRIMARY KEY AUTOINCREMENT,
-                           plotid text PRIMARY KEY,
+                           plotid text NOT NULL,
                            k INTEGER NOT NULL,
                            r INTEGER NOT NULL,
                            b INTEGER NOT NULL,
