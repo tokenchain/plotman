@@ -4,7 +4,8 @@ import os
 import psutil
 import texttable as tt  # from somewhere?
 
-from . import archive, job, manager, plot_util, configuration
+from . import archive, job, manager, configuration
+from .util import plot_util
 
 
 def abbr_path(path, putative_prefix):

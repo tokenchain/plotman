@@ -8,13 +8,13 @@ import pendulum
 import pkg_resources
 import psutil
 
-from . import plot_util
+from .util import plot_util
 from .configuration import Scheduling, Directories, Plotting
 from .farmplot import FarmPlot
 from .job import Job, job_phases_for_tmpdir
 from .manager import phases_permit_new_job
 # Plotman libraries
-from .plot_util import getIP
+from src.plotmanx.util.plot_util import getIP
 
 MIN = 60  # Seconds
 HR = 3600  # Seconds
@@ -44,7 +44,6 @@ class MintJ:
         self.net_bytes_read_last = 0
         self.net_bytes_write_last = 0
         self.iowait_last = 0
-        self.LogFileDaemon = None
 
     def Upcfg(self, schedule: Scheduling, plotting_cfg: Plotting):
         self.schedule_x = schedule
@@ -217,9 +216,12 @@ class MintJ:
 
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
+            historyplots=sum([i.exportProductionPlots for i in jobs]),
+            sizet=sum([h.exportSize for h in jobs]),
             plotcount=fcount,
             movingcount=len(listplmo),
             movingdetail=listplmo,
+
             nfsips=nfslist,
             cpucount=psutil.cpu_count(),
             stamp=int(datetime.datetime.now().timestamp()),

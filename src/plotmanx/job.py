@@ -5,10 +5,9 @@ from datetime import datetime
 
 import psutil
 
-
-from . import plot_util
 from .analyzer import LogFile
 from .reporting import abbr_path, phase_str
+from .util import plot_util
 
 
 def job_phases_for_tmpdir(d, all_jobs) -> list:
@@ -168,6 +167,7 @@ class Job:
             if self.logfilePath:
                 self.zLogFile = LogFile(self.logfilePath)
                 self.zLogFile.init_logfile()
+
                 self.check_freeze()
             else:
                 print('Found plotting process PID {pid}, but could not find '
@@ -282,8 +282,18 @@ class Job:
             tmp=self.tmpdir,
             tmp2=self.tmp2dir,
             dst=self.dstdir,
-            logfile=self.logfilePath
+            logfile=self.logfilePath,
+            freeze=('YES' if self.last_updated_time_in_min > 60 else 'NO'),
+            progress=self.zLogFile.getPlotIdFull
         )
+
+    @property
+    def exportSize(self) -> float:
+        return self.zLogFile.getProductionTPlotSize
+
+    @property
+    def exportProductionPlots(self) -> int:
+        return self.zLogFile.getPlotsDoneHistory
 
     def cancel(self):
         'Cancel an already running job'

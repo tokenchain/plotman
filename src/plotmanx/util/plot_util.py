@@ -1,9 +1,7 @@
-import fcntl
 import math
 import os
 import re
 import socket
-import struct
 
 import pendulum
 
@@ -14,6 +12,17 @@ KSIZE = {
     "33": 550,
     "34": 1118,
     "35": 2335,
+}
+
+PROGRESS_BAR = {
+    "phase1_line_end": 801,
+    "phase2_line_end": 834,
+    "phase3_line_end": 2474,
+    "phase4_line_end": 2620,
+    "phase1_weight": 33.4,
+    "phase2_weight": 20.43,
+    "phase3_weight": 42.29,
+    "phase4_weight": 3.88,
 }
 
 
@@ -124,14 +133,48 @@ def parse_chia_plot_time(s):
     return pendulum.from_format(s, 'ddd MMM DD HH:mm:ss YYYY', locale='en', tz=None)
 
 
-def get_ip_address(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-        s.fileno(),
-        0x8915,  # SIOCGIFADDR
-        struct.pack('256s', ifname[:15])
-    )[20:24])
+def get_ip_address(ifname: str) -> str:
+    """ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+     return socket.inet_ntoa(fcntl.ioctl(
+         s.fileno(),
+         0x8915,  # SIOCGIFADDR
+         struct.pack('256s', ifname[:15])
+     )[20:24])
+     """
+    return socket.gethostname()
 
 
 def getIP() -> str:
     return get_ip_address('eth0')  # '192.168.0.110'
+
+
+def get_plot_progress(line_count: int) -> float:
+    phase1_line_end = PROGRESS_BAR.get('phase1_line_end')
+    phase2_line_end = PROGRESS_BAR.get('phase2_line_end')
+    phase3_line_end = PROGRESS_BAR.get('phase3_line_end')
+    phase4_line_end = PROGRESS_BAR.get('phase4_line_end')
+    phase1_weight = PROGRESS_BAR.get('phase1_weight')
+    phase2_weight = PROGRESS_BAR.get('phase2_weight')
+    phase3_weight = PROGRESS_BAR.get('phase3_weight')
+    phase4_weight = PROGRESS_BAR.get('phase4_weight')
+    progress = 0
+    if line_count > phase1_line_end:
+        progress += phase1_weight
+    else:
+        progress += phase1_weight * (line_count / phase1_line_end)
+        return progress
+    if line_count > phase2_line_end:
+        progress += phase2_weight
+    else:
+        progress += phase2_weight * ((line_count - phase1_line_end) / (phase2_line_end - phase1_line_end))
+        return progress
+    if line_count > phase3_line_end:
+        progress += phase3_weight
+    else:
+        progress += phase3_weight * ((line_count - phase2_line_end) / (phase3_line_end - phase2_line_end))
+        return progress
+    if line_count > phase4_line_end:
+        progress += phase4_weight
+    else:
+        progress += phase4_weight * ((line_count - phase3_line_end) / (phase4_line_end - phase3_line_end))
+    return progress

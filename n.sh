@@ -91,9 +91,15 @@ buildcopyop(){
   VERSION=$(cat VERSION)
   increment_version $VERSION >version
   VERSION=$(cat version)
+  p1=$(pwd)
   cd nvmecc
+  p2=$(pwd)
   env GOOS=linux GOARCH=amd64 go build -o plmo vncc.go
-  zip nvme_linux_${VERSION}.zip plmo 
+  zip nvme_linux_${VERSION}.zip plmo
+  sudo cp "${p2}/nvme_linux_${VERSION}.zip" "${p1}/build/"
+  rm "${p2}/nvme_linux_${VERSION}.zip"
+  rm "${p2}/plmo"
+  echo "success! Please look for the files in the build folder."
 }
 
 

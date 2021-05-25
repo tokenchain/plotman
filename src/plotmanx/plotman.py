@@ -12,6 +12,7 @@ from marshmallow import ValidationError
 
 from . import analyzer, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
+from .analyze.report import analyze
 from .api import start_master_api_node, PostDat
 from .clockwork import MintJ
 from .configuration import PlotmanConfig
@@ -200,7 +201,7 @@ def main():
     # Analysis of completed jobs
     #
     elif args.cmd == 'analyze':
-        analyzer.analyze(args.logfile, args.clipterminals, args.bytmp, args.bybitfield)
+        analyze(args.logfile, args.clipterminals, args.bytmp, args.bybitfield)
 
     else:
         jobs = Job.genTasks(cfg.directories.log)

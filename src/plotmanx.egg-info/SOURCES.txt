@@ -19,7 +19,6 @@ nvmecc/farming.log
 nvmecc/ff.log
 nvmecc/go.mod
 nvmecc/nohup.out
-nvmecc/nvme_linux_0.4.88.zip
 nvmecc/stockup
 nvmecc/stop
 nvmecc/testrun.sh
@@ -29,6 +28,7 @@ nvmecc/worker
 nvmecc/pkg/calle.go
 nvmecc/pkg/skv.go
 nvmecc/temp/writeLock.db
+src/__init__.py
 src/export/csv.py
 src/export/parser.py
 src/export/plotinfo.py
@@ -36,17 +36,16 @@ src/planning/jdob.py
 src/planning/nfs.py
 src/plotmanx/__init__.py
 src/plotmanx/__main__.py
-src/plotmanx/analyzer.py
 src/plotmanx/api.py
 src/plotmanx/archive.py
 src/plotmanx/chia.py
 src/plotmanx/clockwork.py
 src/plotmanx/configuration.py
+src/plotmanx/err.py
 src/plotmanx/farmplot.py
 src/plotmanx/interactive.py
 src/plotmanx/job.py
 src/plotmanx/manager.py
-src/plotmanx/plot_util.py
 src/plotmanx/plotman.py
 src/plotmanx/reporting.py
 src/plotmanx.egg-info/PKG-INFO
@@ -69,8 +68,14 @@ src/plotmanx/_tests/resources/2021-04-04T19_00_47.681088-0400.log
 src/plotmanx/_tests/resources/2021-05-07T20_25_52.841358+08_00 2.log
 src/plotmanx/_tests/resources/2021-05-07T20_25_52.851358+08_00.log
 src/plotmanx/_tests/resources/__init__.py
+src/plotmanx/analyze/__init__.py
+src/plotmanx/analyze/pri.py
+src/plotmanx/analyze/report.py
 src/plotmanx/resources/__init__.py
 src/plotmanx/resources/plotman.yaml
+src/plotmanx/util/__init__.py
+src/plotmanx/util/plot_util.py
+src/plotmanx/util/send_notification.py
 util/installclient
 util/installmaster
 util/installnvme

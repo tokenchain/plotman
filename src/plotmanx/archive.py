@@ -3,7 +3,8 @@ import subprocess
 
 import psutil
 
-from . import manager, plot_util, configuration
+from . import manager, configuration
+from .util import plot_util
 
 
 # TODO : write-protect and delete-protect archived plots

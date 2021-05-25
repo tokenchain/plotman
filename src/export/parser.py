@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import re
+
 from .plotinfo import PlotInfo
 
 
@@ -30,7 +32,7 @@ class PlotLogParser:
         with open(filename, 'r') as f:
             for line in f:
                 for matcher in matchers:
-                    if (matcher(line, entry)):
+                    if matcher(line, entry):
                         break
 
         return entry

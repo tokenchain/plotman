@@ -3,7 +3,6 @@
 
 import sqlite3
 from datetime import datetime
-from sqlite3 import Cursor
 
 import pkg_resources
 import requests
@@ -43,19 +42,23 @@ if __name__ == "__main__":
 """
 
 
-class NodeHandle(web.RequestHandler):
-    def initialize(self, *args, **kwargs):
-        self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
-        self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
+class SQLX:
+    def __init__(self):
+        self.con = sqlite3.connect(get_db_path())
+        self.cur = self.con.cursor()
 
-    def schema_plan(self, c: Cursor):
-        c.execute('''CREATE TABLE IF NOT EXISTS systemchia (
+    def end(self):
+        self.con.commit()
+        self.con.close()
+
+    def schema_plan(self):
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS systemchia (
                            tid text PRIMARY KEY,
                            block text NOT NULL,
                            ip text NOT NULL
                    );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS sysio (
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS sysio (
                                    tid INTEGER PRIMARY KEY AUTOINCREMENT,
                                    ip text NOT NULL,
                                    plotc INTEGER NOT NULL,
@@ -72,14 +75,14 @@ class NodeHandle(web.RequestHandler):
                                    net_write_mb_s INTEGER NOT NULL,
                                    disk_read_mb_s INTEGER NOT NULL,
                                    disk_write_mb_s INTEGER NOT NULL,
-                                   
+
                                    net_fds INTEGER NOT NULL,
                                    version text NOT NULL,
                                    stamp INTEGER NOT NULL
-                                    
+
                            );''')
 
-        c.execute('''CREATE TABLE IF NOT EXISTS plot (
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS plot (
                            pcid INTEGER PRIMARY KEY AUTOINCREMENT,
                            plotid text NOT NULL,
                            k INTEGER NOT NULL,
@@ -91,103 +94,118 @@ class NodeHandle(web.RequestHandler):
                            time text NOT NULL
                    );''')
 
+    def datainput(self, j: dict, ipremo: str, ts: str) -> None:
+
+        if len(j['jobls']) > 0:
+
+            try:
+                for h in j['jobls']:
+
+                    plotid = h['plot_id']
+
+                    #                        if len(plotid) > 8:
+                    #                            plotid = h['plot_id'][:8]
+
+                    content_find = f"""
+
+                    SELECT COUNT(*) FROM plot WHERE plotid='{plotid}';
+                    """
+
+                    (n,) = self.cur.execute(content_find).fetchone()
+                    if int(n) == 0:
+                        content_insert = f"""
+                            INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
+                            VALUES (
+                            '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])},
+                            {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}'
+                            )
+                           ;
+                        """
+
+                        self.cur.execute(content_insert)
+
+                        print(f"ID - {plotid}")
+                    else:
+                        content_update = f"""
+                        UPDATE plot 
+                        SET time='{ts}'
+                        WHERE plotid='{plotid}'
+                        ;
+                        """
+                        self.cur.execute(content_update)
+
+            except sqlite3.OperationalError as r:
+                print(f"there is a things that doesnt work. {r}")
+        else:
+            print("body is not empty")
+
+        content_insert = f"""
+        INSERT INTO sysio (
+        ip,plotc,mvplotc,
+        cpu_count,cpu_percent,cache_percent,slab_percent,swap_percent,disk_percent,iowait_percent,memory_percent,
+        net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,net_fds,version,stamp
+        ) VALUES(
+        '{ipremo}',
+        {int(j['plotcount'])},
+        {int(j['movingcount'])},
+        {int(j['cpucount'])},
+        {float(j['cpu_percent'])},
+        {float(j['cache_percent'])},
+        {float(j['slab_percent'])},
+        {float(j['swap_percent'])},
+        {float(j['disk_percent'])},
+        {float(j['iowait_percent'])},
+        {float(j['memory_percent'])},
+        {commaInt(j['net_read_mb_s'])},
+        {commaInt(j['net_write_mb_s'])},
+        {commaInt(j['disk_read_mb_s'])},
+        {commaInt(j['disk_write_mb_s'])},
+        {commaInt(j['net_fds'])},
+        '{j['version']}',
+        {int(j['stamp'])}
+        )
+        """
+
+        self.cur.execute(content_insert)
+
+
+class NodeHandle(web.RequestHandler):
+    def initialize(self, *args, **kwargs):
+        self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
+        self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
+
     def post(self):
         self.set_header("Content-Type", "text/plain")
         req_body = self.request.body
+        sq = SQLX()
+        sq.schema_plan()
 
         remote_ip = self.request.headers.get("X-Real-IP") or \
                     self.request.headers.get("X-Forwarded-For") or \
                     self.request.remote_ip
 
-        j = dict()
+        jpayload = dict()
+
         try:
-            j = json.loads(req_body)
+            jpayload = json.loads(req_body)
         except:
             print("error from decoding json file.")
             return
 
         try:
-            ipremo = j['identity']
+            ip_remo = jpayload['identity']
         except:
-            ipremo = remote_ip
+            ip_remo = remote_ip
 
-        ts = datetime.now().strftime('%m-%d %H:%M:%S')
+        tstime = datetime.now().strftime('%m-%d %H:%M:%S')
 
-        con = sqlite3.connect(get_db_path())
-        cur = con.cursor()
-        self.schema_plan(cur)
         if req_body is not None:
-            # Insert a row of data
-            # cur.execute(f"INSERT INTO systemchia VALUES ('{ts}','{req_body}','{self.remote_ip}')")
+            sq.datainput(jpayload, ip_remo, tstime)
 
-            if len(j['jobls']) > 0:
-
-                try:
-                    for h in j['jobls']:
-
-                        plotid = h['plot_id']
-
-                        #                        if len(plotid) > 8:
-                        #                            plotid = h['plot_id'][:8]
-
-                        content_find = f"""
-
-                        SELECT COUNT(*) FROM plot WHERE plotid='{plotid}';
-                        """
-
-                        (n,) = cur.execute(content_find).fetchone()
-                        if int(n) == 0:
-                            content_insert = f"""
-                                INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
-                                VALUES (
-                                '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])},
-                                {int(h['u'])}, {int(h['pid'])}, '{ipremo}', '{ts}'
-                                )
-                               ;
-                            """
-
-                            cur.execute(content_insert)
-
-                        print(f"ID - {plotid}")
-
-                except sqlite3.OperationalError as r:
-                    print(f"there is a things that doesnt work. {r}")
-            else:
-                print("body is not empty")
-
-            content_insert = f"""
-INSERT INTO sysio (
-ip,plotc,mvplotc,cpu_count,cpu_percent,
-cache_percent,slab_percent,swap_percent,disk_percent,iowait_percent,memory_percent,
-net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,net_fds,version,stamp
-) VALUES(
-            '{ipremo}',
-            {int(j['plotcount'])},
-            {int(j['movingcount'])},
-            {int(j['cpucount'])},
-            {float(j['cpu_percent'])},
-            {float(j['cache_percent'])},
-            {float(j['slab_percent'])},
-            {float(j['swap_percent'])},
-            {float(j['disk_percent'])},
-            {float(j['iowait_percent'])},
-            {float(j['memory_percent'])},
-            {commaInt(j['net_read_mb_s'])},
-            {commaInt(j['net_write_mb_s'])},
-            {commaInt(j['disk_read_mb_s'])},
-            {commaInt(j['disk_write_mb_s'])},
-            {commaInt(j['net_fds'])},
-            '{j['version']}',
-            {int(j['stamp'])}
-)
-                              """
-            cur.execute(content_insert)
-
-        con.commit()
-        con.close()
+        sq.end()
 
         print("Report data ------")
-        print(f"remote ip: {ipremo} and ver. {j['version']}")
+        print(f"remote ip: {ip_remo} and ver. {jpayload['version']}")
 
 
 def commaInt(x: str) -> int:
