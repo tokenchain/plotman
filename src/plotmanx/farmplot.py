@@ -9,15 +9,16 @@ from . import configuration
 from .configuration import PlotmanConfig
 
 
-def is_plot_moving(cmdline) -> bool:
+def is_plot_moving(cmdline: list) -> bool:
     return (
             len(cmdline) > 3
             and cmdline[0].endswith('plmo')
     )
 
 
-def is_plmo_nfs(cmdline: str) -> bool:
-    m = re.match('^\/mnt\/nfs.*.?(\d+).\/', cmdline)
+def is_plmo_nfs(cmdline: list) -> bool:
+    test = " ".join(cmdline)
+    m = re.match(r"^\/mnt\/nfs.*.?(\d+).\/", test)
     if m:
         return True
     else:
@@ -57,7 +58,8 @@ class FarmPlot:
             with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
                 if is_plot_moving(proc.cmdline()):
                     if is_plmo_nfs(proc.cmdline()):
-                        g = re.match('(\d+)', proc.cmdline())
+                        test = " ".join(proc.cmdline())
+                        g = re.match('(\d+)', test)
                         nfs_list.append(g[0])
 
         return nfs_list

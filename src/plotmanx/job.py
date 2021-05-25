@@ -379,7 +379,6 @@ class Job:
             tmp=self.tmpdir,
             tmp2=self.tmp2dir,
             dst=self.dstdir,
-            plotid=self.plot_id,
             logfile=self.logfile
         )
 
