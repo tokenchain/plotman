@@ -60,6 +60,7 @@ src/plotmanx/err.py
 src/plotmanx/farmplot.py
 src/plotmanx/interactive.py
 src/plotmanx/job.py
+src/plotmanx/maint.py
 src/plotmanx/manager.py
 src/plotmanx/plotman.py
 src/plotmanx/reporting.py

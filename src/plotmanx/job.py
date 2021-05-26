@@ -62,7 +62,7 @@ class Job:
     tmpdir = ''
     tmp2dir = ''
     dstdir = ''
-    logfilePath = ''
+    _logpath = ''
 
     proc = None  # will get a psutil.Process
     help = False
@@ -160,14 +160,14 @@ class Job:
             # file may be open more than once, e.g. for STDOUT and STDERR.
             for f in self.proc.open_files():
                 if logroot in f.path:
-                    if self.logfilePath:
-                        assert self.logfilePath == f.path
+                    if self._logpath:
+                        assert self._logpath == f.path
                     else:
-                        self.logfilePath = f.path
+                        self._logpath = f.path
                     break
 
-            if self.logfilePath:
-                self.zLogFile = LogFile(self.logfilePath)
+            if self._logpath:
+                self.zLogFile = LogFile(self._logpath)
                 self.zLogFile.init_logfile()
 
                 self.check_freeze()
@@ -178,8 +178,8 @@ class Job:
                     print(f.path)
 
     def check_freeze(self) -> None:
-        assert self.logfilePath
-        updatedAt = os.path.getmtime(self.logfilePath)
+        assert self._logpath
+        updatedAt = os.path.getmtime(self._logpath)
         now = datetime.now().timestamp()
         self.last_updated_time_in_min = int((now - updatedAt) / 60)
 
@@ -194,6 +194,10 @@ class Job:
             return True
         else:
             return False
+
+    @property
+    def getLogPath(self) -> str:
+        return self._logpath
 
     @property
     def plot_id(self) -> str:
@@ -300,7 +304,7 @@ class Job:
             tmp=self.tmpdir,
             tmp2=self.tmp2dir,
             dst=self.dstdir,
-            logfile=self.logfilePath,
+            logfile=self.getLogPath,
             freeze=('YES' if self.last_updated_time_in_min > 60 else 'NO'),
             progress=self.zLogFile.getPlotIdFull
         )
@@ -342,7 +346,7 @@ def report_jdata(jobs, tmp_prefix='', dst_prefix='') -> list:
                 'sys': plot_util.time_format(j.get_time_sys()),
                 'io': plot_util.time_format(j.get_time_iowait()),
                 'freezed': plot_util.is_freezed(j),
-                'logfile': os.path.basename(j.logfilePath)
+                'logfile': os.path.basename(j.getLogPath)
             }
             jobsr.append(dictionary)
 
