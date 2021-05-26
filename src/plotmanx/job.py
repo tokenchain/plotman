@@ -196,6 +196,10 @@ class Job:
             return False
 
     @property
+    def plot_id(self) -> str:
+        return self.zLogFile.getPlotIdFull
+
+    @property
     def plot_id_prefix(self) -> str:
         return self.zLogFile.getPlotIdShort
 

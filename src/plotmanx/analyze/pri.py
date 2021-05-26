@@ -181,7 +181,7 @@ class LogFile:
             self._phase = (0, 0)
 
         if plotpool > 0:
-            self._total_T = plotpool / plot_util.GB
+            self._total_T = plotpool / 1000
 
         self._produced = plots
 
