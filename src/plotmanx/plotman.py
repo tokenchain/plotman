@@ -13,7 +13,7 @@ from marshmallow import ValidationError
 from . import analyze, archive, configuration, interactive, manager, reporting
 from . import resources as plotman_resources
 from .analyze.report import analyze
-from .api import start_master_api_node, PostDat
+from .query.api import start_master_api_node, PostDat
 from .clockwork import MintJ
 from .configuration import PlotmanConfig
 from .farmplot import FarmPlot

@@ -48,10 +48,10 @@ src/export/csv.py
 src/export/parser.py
 src/export/plotinfo.py
 src/planning/jdob.py
+src/planning/jdobv2.py
 src/planning/nfs.py
 src/plotmanx/__init__.py
 src/plotmanx/__main__.py
-src/plotmanx/api.py
 src/plotmanx/archive.py
 src/plotmanx/chia.py
 src/plotmanx/clockwork.py
@@ -87,6 +87,9 @@ src/plotmanx/_tests/resources/__init__.py
 src/plotmanx/analyze/__init__.py
 src/plotmanx/analyze/pri.py
 src/plotmanx/analyze/report.py
+src/plotmanx/query/__init__.py
+src/plotmanx/query/api.py
+src/plotmanx/query/sql.py
 src/plotmanx/resources/__init__.py
 src/plotmanx/resources/plotman.yaml
 src/plotmanx/util/__init__.py

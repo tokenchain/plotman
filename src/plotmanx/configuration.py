@@ -96,6 +96,14 @@ def get_db_path() -> str:
     return f"{appdirs.user_config_dir('plotman')}/rsystem.db"
 
 
+def get_dash_v1() -> str:
+    return f"{appdirs.user_config_dir('plotman')}/v1app"
+
+
+def get_dash_v1_static() -> str:
+    return f"{appdirs.user_config_dir('plotman')}/v1app/static"
+
+
 def get_dst_directories(dir_cfg: Directories):
     """Returns either (True, <Directories.dst>) or (False, <Directories.tmp>). If Directories.dst is None,
     Use Directories.tmp as dst directory."""
