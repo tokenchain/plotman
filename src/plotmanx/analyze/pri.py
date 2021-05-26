@@ -178,7 +178,7 @@ class LogFile:
 
             lines = f.readlines()
             last_line = lines[-1:]
-            m = re.match(r'^Only wrote', last_line)
+            m = re.match(r'^Only wrote', last_line[0])
             if m:
                 disk_space = True
 
