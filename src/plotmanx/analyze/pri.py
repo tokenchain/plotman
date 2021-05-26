@@ -69,10 +69,12 @@ class LogFile:
         assert self.path
         # Try reading for a while; it can take a while for the job to get started as it scans
         # existing plot dirs (especially if they are NFS).
+
         found_id = False
         found_log = False
         plots = 0
-        for attempt_number in range(3):
+
+        for attempt_number in range(1):
             plots = 0
             with open(self.path, 'r') as f:
 
@@ -112,7 +114,7 @@ class LogFile:
         self._progress = get_plot_progress(line_count)
         # Load things from logfile that are dynamic
         self.updatePhases()
-        self.updateGeneratePlots()
+        # self.updateGeneratePlots()
 
     def updatePhases(self):
         assert self.path
@@ -124,6 +126,7 @@ class LogFile:
         # Phase 4 subphases are <started>
         phase_subphases = {}
         plots = 0
+        phase = 0
         with open(self.path, 'r') as f:
             for line in f:
                 # "Starting phase 1/4: Forward Propagation into tmp files... Sat Oct 31 11:27:04 2020"
@@ -148,10 +151,10 @@ class LogFile:
                     phase_subphases[3] = max(phase_subphases[3], int(m.group(1)))
 
                 # "Time for phase 1 = 22796.7 seconds. CPU (98%) Tue Sep 29 17:57:19 2020"
-                for phase in ['1', '2', '3', '4']:
-                    m = re.match(r'^Time for phase ' + phase + ' = (\d+.\d+) seconds..*', line)
+                for phase_t in ['1', '2', '3', '4']:
+                    m = re.match(r'^Time for phase ' + phase_t + ' = (\d+.\d+) seconds..*', line)
                     if m:
-                        self._phase_time.setdefault(f"ph{phase}", float(m.group(1)))
+                        self._phase_time.setdefault(f"ph{phase_t}", float(m.group(1)))
 
                 # Total time = 49487.1 seconds. CPU (97.26%) Wed Sep 30 01:22:10 2020
                 # m = re.match(r'^Total time = (\d+.\d+) seconds.*', line)
@@ -160,11 +163,8 @@ class LogFile:
 
                 m = re.match(r'^Renamed final file from', line)
                 if m:
-                    phase_subphases[0] = 0
-                    phase_subphases[1] = 0
-                    phase_subphases[2] = 0
-                    phase_subphases[3] = 0
-                    phase_subphases[4] = 0
+                    phase = 0
+                    phase_subphases = {}
                     plots += 1
 
         if phase_subphases:
@@ -198,3 +198,4 @@ class LogFile:
         print(f"total plots: {self._total_plots}")
         print(f"current plot id: {self._current_plot_id}")
         print(f"pid: {self._pid}")
+        print(f"produced plots: {self._produced}")
