@@ -190,6 +190,12 @@ class Job:
         """
         return self.zLogFile.getPhase
 
+    def isJobStartWithId(self, shortID: str) -> bool:
+        if self.zLogFile.getPlotIdFull.startswith(shortID):
+            return True
+        else:
+            return False
+
     @property
     def plot_id_prefix(self) -> str:
         return self.zLogFile.getPlotIdShort
