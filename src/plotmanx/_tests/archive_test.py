@@ -1,12 +1,14 @@
-from plotmanx import archive, configuration, manager
+from plotmanx import archive, configuration
 
 
 def test_compute_priority():
-    assert (archive.compute_priority( (3, 1), 1000, 10) >
-            archive.compute_priority( (3, 6), 1000, 10) )
+    assert (archive.compute_priority((3, 1), 1000, 10) >
+            archive.compute_priority((3, 6), 1000, 10))
+
 
 def test_rsync_dest():
     arch_dir = '/plotdir/012'
+
     arch_cfg = configuration.Archive(
         rsyncd_module='plots_mod',
         rsyncd_path='/plotdir',

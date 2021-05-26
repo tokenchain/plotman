@@ -10,12 +10,12 @@ from .util import plot_util
 
 
 def job_phases_for_tmpdir(d, all_jobs) -> list:
-    '''Return phase 2-tuples for jobs running on tmpdir d'''
+    """Return phase 2-tuples for jobs running on tmpdir d"""
     return sorted([j.progress() for j in all_jobs if j.tmpdir == d])
 
 
 def job_phases_for_dstdir(d, all_jobs) -> list:
-    '''Return phase 2-tuples for jobs outputting to dstdir d'''
+    """Return phase 2-tuples for jobs outputting to dstdir d"""
     return sorted([j.progress() for j in all_jobs if j.dstdir == d])
 
 
@@ -246,7 +246,6 @@ class Job:
     def get_run_status(self) -> str:
         """
         Running, suspended, etc.
-
         """
         status = self.proc.status()
         if status == psutil.STATUS_RUNNING:

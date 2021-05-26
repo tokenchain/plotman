@@ -21,12 +21,9 @@ def test_time_format():
 
 
 def test_split_path_prefix():
-    assert (plot_util.split_path_prefix([]) ==
-            ('', []))
-    assert (plot_util.split_path_prefix(['/a/0', '/b/1', '/c/2']) ==
-            ('', ['/a/0', '/b/1', '/c/2']))
-    assert (plot_util.split_path_prefix(['/a/b/0', '/a/b/1', '/a/b/2']) ==
-            ('/a/b', ['0', '1', '2']))
+    assert (plot_util.split_path_prefix([]) == ('', []))
+    assert (plot_util.split_path_prefix(['/a/0', '/b/1', '/c/2']) == ('', ['/a/0', '/b/1', '/c/2']))
+    assert (plot_util.split_path_prefix(['/a/b/0', '/a/b/1', '/a/b/2']) == ('/a/b', ['0', '1', '2']))
 
 
 def test_columns():

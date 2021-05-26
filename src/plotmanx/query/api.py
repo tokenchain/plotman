@@ -36,7 +36,8 @@ class ApiBase(web.RequestHandler):
     def send_response(self, data, status=200):
         """Construct and send a JSON response with appropriate status code."""
         self.set_status(status)
-        response = {'result': 1, 'data': data}
+        t = int(datetime.now().timestamp()),
+        response = {'result': 1, 'data': data, 'ts': t}
         self.write(json.dumps(response))
 
 
@@ -45,7 +46,6 @@ class ApiBase(web.RequestHandler):
 from prometheus_client.core import GaugeMetricFamily
 
 class PlotmanCollector:
-
     def collect(self):
         cfg = configuration.get_validated_configs()
         jobs = Job.genTasks(cfg.directories.log)

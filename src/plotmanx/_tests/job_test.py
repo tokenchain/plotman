@@ -1,10 +1,9 @@
 import contextlib
 import datetime
-import locale
 import importlib.resources
+import locale
 
 import pytest
-
 from plotmanx import resources
 from plotmanx.job import Job
 
@@ -33,22 +32,21 @@ def logfile_fixture(tmp_path):
 @contextlib.contextmanager
 def set_locale(name):
     # This is terrible and not thread safe.
-
     original = locale.setlocale(locale.LC_ALL)
-
     try:
         yield locale.setlocale(locale.LC_ALL, name)
     finally:
         locale.setlocale(locale.LC_ALL, original)
 
+
 with set_locale('C'):
     log_file_time = datetime.datetime.strptime('Sun Apr  4 19:00:50 2021', '%a %b  %d %H:%M:%S %Y')
+
 
 @pytest.mark.parametrize(
     argnames=['locale_name'],
     argvalues=[['C'], ['en_US.UTF-8'], ['de_DE.UTF-8']],
 )
-
 def test_job_parses_time_with_non_english_locale(logfile_path, locale_name):
     faux_job_with_logfile = FauxJobWithLogfile(logfile_path=logfile_path)
 

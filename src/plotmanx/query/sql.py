@@ -106,28 +106,29 @@ class SQLX:
 
         content_insert = f"""
         INSERT INTO sysio (
-        ip,plotc,mvplotc,
-        cpu_count,cpu_percent,cache_percent,slab_percent,swap_percent,disk_percent,iowait_percent,memory_percent,
-        net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,net_fds,version,stamp
+            ip,plotc,mvplotc,cpu_count,cpu_percent,cache_percent,slab_percent,
+            swap_percent,disk_percent,iowait_percent,memory_percent,
+            net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,
+            net_fds,version,stamp
         ) VALUES(
-        '{ipremo}',
-        {int(j['plotcount'])},
-        {int(j['movingcount'])},
-        {int(j['cpucount'])},
-        {float(j['cpu_percent'])},
-        {float(j['cache_percent'])},
-        {float(j['slab_percent'])},
-        {float(j['swap_percent'])},
-        {float(j['disk_percent'])},
-        {float(j['iowait_percent'])},
-        {float(j['memory_percent'])},
-        {commaInt(j['net_read_mb_s'])},
-        {commaInt(j['net_write_mb_s'])},
-        {commaInt(j['disk_read_mb_s'])},
-        {commaInt(j['disk_write_mb_s'])},
-        {commaInt(j['net_fds'])},
-        '{j['version']}',
-        {int(j['stamp'])}
+            '{ipremo}',
+            {int(j['plotcount'])},
+            {int(j['movingcount'])},
+            {int(j['cpucount'])},
+            {float(j['cpu_percent'])},
+            {float(j['cache_percent'])},
+            {float(j['slab_percent'])},
+            {float(j['swap_percent'])},
+            {float(j['disk_percent'])},
+            {float(j['iowait_percent'])},
+            {float(j['memory_percent'])},
+            {commaInt(j['net_read_mb_s'])},
+            {commaInt(j['net_write_mb_s'])},
+            {commaInt(j['disk_read_mb_s'])},
+            {commaInt(j['disk_write_mb_s'])},
+            {commaInt(j['net_fds'])},
+            '{j['version']}',
+            {int(j['stamp'])}
         )
         """
 

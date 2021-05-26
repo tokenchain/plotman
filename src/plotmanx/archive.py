@@ -152,13 +152,13 @@ def archive(dir_cfg, all_jobs):
 
     # TODO: sanity check that archive machine is available
     # TODO: filter drives mounted RO
-
     #
     # Pick first archive dir with sufficient space
     #
     archdir_freebytes = get_archdir_freebytes(dir_cfg.archive)
     if not archdir_freebytes:
         return (False, 'No free archive dirs found.')
+
     freespace = 0
     archdir = ''
     available = [(d, space) for (d, space) in archdir_freebytes.items() if
