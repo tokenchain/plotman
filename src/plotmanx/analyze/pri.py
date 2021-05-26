@@ -3,6 +3,7 @@ import re
 import time
 from datetime import datetime
 
+from ..util import plot_util
 from ..util.plot_util import parse_chia_plot_time, get_plot_progress
 
 
@@ -42,10 +43,6 @@ class LogFile:
     @property
     def getPlotIdShort(self) -> str:
         return self._current_plot_id[:8]
-
-    @property
-    def getPlotsDoneHistory(self) -> int:
-        return self._total_plots
 
     @property
     def getProductionTPlotSize(self) -> float:
@@ -127,6 +124,7 @@ class LogFile:
         phase_subphases = {}
         plots = 0
         phase = 0
+        plotpool = 0
         with open(self.path, 'r') as f:
             for line in f:
 
@@ -165,6 +163,10 @@ class LogFile:
                 # m = re.match(r'^Total time = (\d+.\d+) seconds.*', line)
                 # if m:
                 # data.setdefault(key, {}).setdefault('total time', []).append(float(m.group(1)))
+                m = re.match(r'^Final File size: (\d+.\d+).*', line)
+                if m:
+                    size = float(m.group(1))
+                    plotpool = plotpool + size
 
                 m = re.match(r'^Renamed final file from', line)
                 if m:
@@ -178,29 +180,13 @@ class LogFile:
         else:
             self._phase = (0, 0)
 
+        if plotpool > 0:
+            self._total_T = plotpool / plot_util.GB
+
         self._produced = plots
-
-    def updateGeneratePlots(self):
-        assert self.path
-        size_list = []
-        grandsize = 0
-        plots = 0
-        with open(self.path, 'r') as f:
-            for line in f:
-                m = re.match(r'^Final File size: (\d+.\d+).*', line)
-                if m:
-                    size = float(m.group(1))
-                    size_list.append(size)
-                    grandsize = grandsize + size
-                    plots += 1
-
-        if grandsize > 0:
-            self._total_T = grandsize / 1024
-            self._total_plots = plots
 
     def print(self):
         print(f"total T size: {self._total_T}")
-        print(f"total plots: {self._total_plots}")
         print(f"current plot id: {self._current_plot_id}")
         print(f"pid: {self._pid}")
         print(f"produced plots: {self._produced}")

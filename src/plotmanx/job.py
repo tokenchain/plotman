@@ -302,7 +302,7 @@ class Job:
 
     @property
     def exportProductionPlots(self) -> int:
-        return self.zLogFile.getPlotsDoneHistory
+        return self.zLogFile.completedJobs
 
     def cancel(self):
         'Cancel an already running job'

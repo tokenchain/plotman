@@ -22,7 +22,6 @@ def test_one():
     file = os.path.join(dir, log_name)
     fileo = LogFile(file)
     fileo.init_logfile()
-    fileo.updateGeneratePlots()
     fileo.print()
 
 
