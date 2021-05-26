@@ -129,6 +129,11 @@ class LogFile:
         phase = 0
         with open(self.path, 'r') as f:
             for line in f:
+
+                m = re.match('^ID: ([0-9a-f]*)', line)
+                if m:
+                    self._current_plot_id = m.group(1)
+
                 # "Starting phase 1/4: Forward Propagation into tmp files... Sat Oct 31 11:27:04 2020"
                 m = re.match(r'^Starting phase (\d).*', line)
                 if m:
