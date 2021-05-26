@@ -1,3 +1,4 @@
+import concurrent.futures
 import datetime
 import glob
 import operator
@@ -8,18 +9,26 @@ import pendulum
 import pkg_resources
 import psutil
 
-from .util import plot_util
 from .configuration import Scheduling, Directories, Plotting
 from .farmplot import FarmPlot
 from .job import Job, job_phases_for_tmpdir
 from .manager import phases_permit_new_job
+from .util import plot_util
 # Plotman libraries
-from .util.plot_util import getIP
+from .util.plot_util import getIP, isSpaceCritical
 
 MIN = 60  # Seconds
 HR = 3600  # Seconds
 MAX_PLOT_SIZE = 332  # Minimum gb required for k32 plot
 MAX_AGE = 1000_000_000  # Arbitrary large number of seconds
+
+
+def terminate(job: Job) -> None:
+    job.suspend()
+    temp_files = job.get_temp_files()
+    job.cancel()
+    for f in temp_files:
+        os.remove(f)
 
 
 class MintJ:
@@ -170,6 +179,29 @@ class MintJ:
 
     def PlotDaemon(self):
         self.plotdaemon = True
+
+    def SpaceManagement(self) -> None:
+        for d in self.dir_cfg_x.tmp:
+            ls = []
+            if isSpaceCritical(d):
+                for j in self.jobs:
+                    if j.isFrozen is True:
+                        size = plot_util.human_format(j.get_tmp_usage(), 0)
+                        print(f'remove from frozen job for space, with temp size {size} [{j.plot_id}]')
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                            executor.submit(terminate, j)
+
+                    elif j.isWroteErr is True and plot_util.is_phase_start(j.progress()) is True:
+                        ls.append(j)
+
+            if len(ls) > 0:
+                jf = sorted([m.get_tmp_usage() for m in ls])[0]
+                size = plot_util.human_format(jf.get_tmp_usage(), 0)
+                print(f'remove temp files for space from sorted temp size {size} [{jf.plot_id}]')
+                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                    executor.submit(terminate, jf)
+
+
 
     def ParallelWorker(self):
         for i in range(self.parallel):

@@ -26,7 +26,12 @@ PROGRESS_BAR = {
 }
 
 
-def phase_str(phase_pair):
+def is_phase_start(phase_pair) -> bool:
+    (ph, subph) = phase_pair
+    return ph < 2 and subph < 2
+
+
+def phase_str(phase_pair) -> str:
     (ph, subph) = phase_pair
     return ((str(ph) if ph is not None else '?') + ':'
             + (str(subph) if subph is not None else '?'))
@@ -52,6 +57,14 @@ def checkTempSpace(knm: int, tmpdir: str) -> bool:
             if gb_free > float(v):
                 return True
     return False
+
+
+def isSpaceCritical(tmpdir: str) -> bool:
+    gb_free = df_b(tmpdir) / GB
+    if gb_free < 0.1:
+        return True
+    else:
+        return False
 
 
 def availableSpace(tmpdir: str) -> str:

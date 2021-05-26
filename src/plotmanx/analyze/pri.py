@@ -3,7 +3,6 @@ import re
 import time
 from datetime import datetime
 
-from ..util import plot_util
 from ..util.plot_util import parse_chia_plot_time, get_plot_progress
 
 
@@ -23,6 +22,7 @@ class LogFile:
         self._phase = (0, 0)
         self._phase_time = dict()
         self._progress = 0
+        self._disk_tight = False
 
     @property
     def getPhase(self):
@@ -75,9 +75,6 @@ class LogFile:
             plots = 0
             with open(self.path, 'r') as f:
 
-                filedat = f.read()
-                line_count = (filedat.count('\n') + 1)
-
                 for line in f:
                     m = re.match('^ID: ([0-9a-f]*)', line)
                     if m:
@@ -95,6 +92,9 @@ class LogFile:
                     if m:
                         plots += 1
 
+                filedat = f.read()
+                lin_count = (filedat.count('\n') + 1)
+
             if found_id and found_log:
                 break  # Stop trying
             else:
@@ -108,7 +108,7 @@ class LogFile:
         if not found_log:
             self._start_time = datetime.fromtimestamp(os.path.getctime(self.path))
         self._produced = plots
-        self._progress = get_plot_progress(line_count)
+        self._progress = get_plot_progress(lin_count)
         # Load things from logfile that are dynamic
         self.updatePhases()
         # self.updateGeneratePlots()
@@ -125,7 +125,9 @@ class LogFile:
         plots = 0
         phase = 0
         plotpool = 0
+        disk_space = False
         with open(self.path, 'r') as f:
+
             for line in f:
 
                 m = re.match('^ID: ([0-9a-f]*)', line)
@@ -174,16 +176,28 @@ class LogFile:
                     phase_subphases = {}
                     plots += 1
 
+            lines = f.readlines()
+            last_line = lines[-1:]
+            m = re.match(r'^Only wrote', last_line)
+            if m:
+                disk_space = True
+
         if phase_subphases:
             phase = max(phase_subphases.keys())
             self._phase = (phase, phase_subphases[phase])
         else:
             self._phase = (0, 0)
 
+        self._produced = plots
+
         if plotpool > 0:
             self._total_T = plotpool / 1000
 
-        self._produced = plots
+        self._disk_tight = disk_space
+
+    @property
+    def disk_confirm(self):
+        return self._disk_tight
 
     def print(self):
         print(f"total T size: {self._total_T}")

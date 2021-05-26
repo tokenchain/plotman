@@ -119,6 +119,7 @@ def curses_main_v2(stdscr):
             mini.Upcfg(cfg.scheduling, cfg.plotting)
             if plotting_active:
                 mini.ParallelWorker()
+
                 aging_reason = mini.wait_reason
                 log.log(aging_reason)
 

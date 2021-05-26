@@ -169,8 +169,8 @@ class Job:
             if self._logpath:
                 self.zLogFile = LogFile(self._logpath)
                 self.zLogFile.init_logfile()
-
                 self.check_freeze()
+
             else:
                 print('Found plotting process PID {pid}, but could not find '
                       'logfile in its open files:'.format(pid=self.proc.pid))
@@ -304,9 +304,17 @@ class Job:
             tmp2=self.tmp2dir,
             dst=self.dstdir,
             logfile=self.getLogPath,
-            freeze=('YES' if self.last_updated_time_in_min > 60 else 'NO'),
+            freeze=('YES' if self.isFrozen else 'NO'),
             progress=self.zLogFile.getPlotIdFull
         )
+
+    @property
+    def isFrozen(self) -> bool:
+        return self.last_updated_time_in_min > 60
+
+    @property
+    def isWroteErr(self) -> bool:
+        return self.zLogFile.disk_confirm
 
     @property
     def exportSize(self) -> float:

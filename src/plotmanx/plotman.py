@@ -109,6 +109,8 @@ def plotting(cfg: PlotmanConfig):
             if cfg.apis.target is not "":
                 PostDat(minp.GenStatus(minp.LsJobs), cfg)
 
+            minp.SpaceManagement()
+
         except ValidationError as te:
             print('got ConfigurationException from io', te)
             continue
