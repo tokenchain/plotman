@@ -177,10 +177,11 @@ class LogFile:
                     plots += 1
 
             lines = f.readlines()
-            last_line = lines[-1:]
-            m = re.match(r'^Only wrote', last_line[0])
-            if m:
-                disk_space = True
+            lastlns = lines[-1:]
+            if len(lastlns) > 0:
+                m = re.match(r'^Only wrote', lastlns[0])
+                if m:
+                    disk_space = True
 
         if phase_subphases:
             phase = max(phase_subphases.keys())
