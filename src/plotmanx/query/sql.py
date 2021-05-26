@@ -1,6 +1,6 @@
 import sqlite3
 
-from src.plotmanx.configuration import get_db_path
+from ..configuration import get_db_path
 
 
 def commaInt(x: str) -> int:
