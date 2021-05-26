@@ -92,6 +92,9 @@ class Job:
                 if is_plotting_cmdline(proc.cmdline()):
                     if proc.pid in cached_jobs_by_pid.keys():
                         cached_job = cached_jobs_by_pid[proc.pid]
+                        # checking the status for more actions
+                        # check for dead locks - Only wrote ...
+                        # Only wrote 14708736 of 38859264 bytes at offset 310874112 to "/mnt/nvme/temp/plot-k32-2021-05-25-20-47-f56ddde3daa4cbbf2c7a3a4c79d70d259b26a622ed69ee64df199d253d9e019d.plot.p2.t5.sort_bucket_013.tmp"with length 325582848. Error 1. Retrying in five minutes.
                         if cached_job.get_tmp_usage() == 0:
                             try:
                                 job1 = Job(proc, logroot)

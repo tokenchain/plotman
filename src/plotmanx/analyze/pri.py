@@ -80,8 +80,9 @@ class LogFile:
                         self._start_time = parse_chia_plot_time(m.group(1))
                         found_log = True
                         # continue and looking for the last occurance
-                    filedat = f.read()
-                    line_count = (filedat.count('\n') + 1)
+                        
+                filedat = f.read()
+                line_count = (filedat.count('\n') + 1)
 
             if found_id and found_log:
                 break  # Stop trying
