@@ -2652,6 +2652,11 @@ Renamed final file from "/mnt/nfs/storage236/plot-k32-2021-05-07-20-25-79bbf1263
 2021-05-08T21:20:47.766  chia.plotting.create_plots       : INFO     Summary:
 2021-05-08T21:20:47.767  chia.plotting.create_plots       : INFO     Created a total of 1 new plots
 2021-05-08T21:20:47.767  chia.plotting.create_plots       : INFO     plot-k32-2021-05-07-20-25-79bbf1263dc280376ed7664b6b3a2a3e53ee5993cd4157e0ad78fc94221ce47f.plot
+
+
+
+
+
 Approximate working space used (without final file): 269.341 GiB
 Final File size: 101.354 GiB
 Approximate working space used (without final file): 269.341 GiB

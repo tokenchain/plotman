@@ -144,6 +144,10 @@ def get_ip_address(ifname: str) -> str:
     return socket.gethostname()
 
 
+def countnonoverlappingrematches(pattern, thestring):
+    return re.subn(pattern, '', thestring)[1]
+
+
 def getIP() -> str:
     return get_ip_address('eth0')  # '192.168.0.110'
 

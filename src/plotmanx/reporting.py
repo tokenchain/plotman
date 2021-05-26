@@ -98,7 +98,14 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
         n_end_rows = n_rows - n_begin_rows
 
     tab = tt.Texttable()
-    headings = ['plot id', 'k', 'tmp', 'dst', 'wall', 'phase', 'tpsize', 'pid', 'stat', 'mem', 'user', 'sys', 'io', 'freezed', 'logfile']
+
+    headings = [
+        'plot id', 'k', 'tmp', 'dst',
+        'wall', 'phase', 'tpsize', 'pid',
+        'prod', 'plots', 'user', 'sys',
+        'io', 'frzed', 'logfile'
+    ]
+
     headingwidth = len(headings)
     if height:
         headings.insert(0, '#')
@@ -126,8 +133,9 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
                            phase_str(j.progress()),
                            plot_util.human_format(j.get_tmp_usage(), 0),
                            j.proc.pid,
-                           j.get_run_status(),
-                           plot_util.human_format(j.get_mem_usage(), 1),
+                           plot_util.human_format(j.get_produced_size(), 1),
+                           j.get_produced_plots(),
+                           # plot_util.human_format(j.get_mem_usage(), 1),
                            plot_util.time_format(j.get_time_user()),
                            plot_util.time_format(j.get_time_sys()),
                            plot_util.time_format(j.get_time_iowait()),
@@ -233,12 +241,11 @@ def dirs_report(jobs, dir_cfg, sched_cfg, width):
     """
     # return '\n'.join(reports) + '\n'
     return (
-        tmp_dir_report(jobs, dir_cfg, sched_cfg, width) + '\n' +
-        dst_dir_report(jobs, dst_dir, width) + '\n' +
-        'archive dirs free space:\n' +
-        arch_dir_report(archive.get_archdir_freebytes(dir_cfg.archive), width) + '\n'
+            tmp_dir_report(jobs, dir_cfg, sched_cfg, width) + '\n' +
+            dst_dir_report(jobs, dst_dir, width) + '\n' +
+            'archive dirs free space:\n' +
+            arch_dir_report(archive.get_archdir_freebytes(dir_cfg.archive), width) + '\n'
     )
-
 
 
 def jsondata(jobs, tmp_prefix='', dst_prefix='') -> list:

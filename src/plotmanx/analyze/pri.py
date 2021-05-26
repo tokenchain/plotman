@@ -16,6 +16,7 @@ class LogFile:
         self._total_plots = 0
         self._total_T = 0
         self._pid = 0
+        self._produced = 0
         self._start_time = 0
         self._current_plot_id = '--------'
         self._phase = (0, 0)
@@ -54,6 +55,9 @@ class LogFile:
     def getProgress(self) -> float:
         return self._progress
 
+    @property
+    def completedJobs(self):
+        return self._produced
 
     # Initialize data that needs to be loaded from the logfile
     def init_logfile(self):
@@ -67,22 +71,30 @@ class LogFile:
         # existing plot dirs (especially if they are NFS).
         found_id = False
         found_log = False
+        plots = 0
         for attempt_number in range(3):
+            plots = 0
             with open(self.path, 'r') as f:
+
+                filedat = f.read()
+                line_count = (filedat.count('\n') + 1)
+
                 for line in f:
                     m = re.match('^ID: ([0-9a-f]*)', line)
                     if m:
                         self._current_plot_id = m.group(1)
                         found_id = True
+
                     m = re.match(r'^Starting phase 1/4:.*\.\.\. (.*)', line)
                     if m:
                         # Mon Nov  2 08:39:53 2020
                         self._start_time = parse_chia_plot_time(m.group(1))
                         found_log = True
-                        # continue and looking for the last occurance
-                        
-                filedat = f.read()
-                line_count = (filedat.count('\n') + 1)
+                        # continue and looking for the last
+
+                    m = re.match(r'^Renamed final file from', line)
+                    if m:
+                        plots += 1
 
             if found_id and found_log:
                 break  # Stop trying
@@ -96,12 +108,11 @@ class LogFile:
 
         if not found_log:
             self._start_time = datetime.fromtimestamp(os.path.getctime(self.path))
-
+        self._produced = plots
         self._progress = get_plot_progress(line_count)
         # Load things from logfile that are dynamic
         self.updatePhases()
         self.updateGeneratePlots()
-
 
     def updatePhases(self):
         assert self.path
@@ -112,7 +123,7 @@ class LogFile:
         # Phase 3 subphases are <started>, tables1&2, tables2&3, ...
         # Phase 4 subphases are <started>
         phase_subphases = {}
-
+        plots = 0
         with open(self.path, 'r') as f:
             for line in f:
                 # "Starting phase 1/4: Forward Propagation into tmp files... Sat Oct 31 11:27:04 2020"
@@ -147,11 +158,22 @@ class LogFile:
                 # if m:
                 # data.setdefault(key, {}).setdefault('total time', []).append(float(m.group(1)))
 
+                m = re.match(r'^Renamed final file from', line)
+                if m:
+                    phase_subphases[0] = 0
+                    phase_subphases[1] = 0
+                    phase_subphases[2] = 0
+                    phase_subphases[3] = 0
+                    phase_subphases[4] = 0
+                    plots += 1
+
         if phase_subphases:
             phase = max(phase_subphases.keys())
             self._phase = (phase, phase_subphases[phase])
         else:
             self._phase = (0, 0)
+
+        self._produced = plots
 
     def updateGeneratePlots(self):
         assert self.path

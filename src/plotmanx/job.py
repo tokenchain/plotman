@@ -209,6 +209,12 @@ class Job:
             logfile=self.zLogFile.path
         )
 
+    def get_produced_size(self):
+        return self.zLogFile.getProductionTPlotSize
+
+    def get_produced_plots(self):
+        return self.zLogFile.completedJobs
+
     def get_mem_usage(self):
         return self.proc.memory_info().vms  # Total, inc swapped
 
