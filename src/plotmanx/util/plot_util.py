@@ -26,6 +26,13 @@ PROGRESS_BAR = {
 }
 
 
+def abbr_path(path, putative_prefix):
+    if putative_prefix and path.startswith(putative_prefix):
+        return os.path.relpath(path, putative_prefix)
+    else:
+        return path
+
+
 def df_b(d):
     'Return free space for directory (in bytes)'
     stat = os.statvfs(d)

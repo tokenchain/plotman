@@ -6,8 +6,9 @@ from datetime import datetime
 import psutil
 
 from .analyze.pri import LogFile
-from .reporting import abbr_path, phase_str
+from .reporting import phase_str
 from .util import plot_util
+
 
 
 def job_phases_for_tmpdir(d, all_jobs) -> list:
@@ -327,8 +328,8 @@ def report_jdata(jobs, tmp_prefix='', dst_prefix='') -> list:
             dictionary = {
                 'plotid': j.plot_id_prefix,
                 'k': j.k,
-                'tmp': abbr_path(j.tmpdir, tmp_prefix),
-                'dst': abbr_path(j.dstdir, dst_prefix),
+                'tmp': plot_util.abbr_path(j.tmpdir, tmp_prefix),
+                'dst': plot_util.abbr_path(j.dstdir, dst_prefix),
                 'wall': plot_util.time_format(j.get_time_wall()),
                 'phase': phase_str(j.progress()),
                 'tmpdisk': plot_util.human_format(j.get_tmp_usage(), 0),

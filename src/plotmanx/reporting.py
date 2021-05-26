@@ -8,13 +8,6 @@ from . import archive, job, manager, configuration
 from .util import plot_util
 
 
-def abbr_path(path, putative_prefix):
-    if putative_prefix and path.startswith(putative_prefix):
-        return os.path.relpath(path, putative_prefix)
-    else:
-        return path
-
-
 def phase_str(phase_pair):
     (ph, subph) = phase_pair
     return ((str(ph) if ph is not None else '?') + ':'
@@ -127,8 +120,8 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
                 with j.proc.oneshot():
                     row = [j.plot_id_prefix,
                            j.k,
-                           abbr_path(j.tmpdir, tmp_prefix),
-                           abbr_path(j.dstdir, dst_prefix),
+                           plot_util.abbr_path(j.tmpdir, tmp_prefix),
+                           plot_util.abbr_path(j.dstdir, dst_prefix),
                            plot_util.time_format(j.get_time_wall()),
                            phase_str(j.progress()),
                            plot_util.human_format(j.get_tmp_usage(), 0),
@@ -169,7 +162,7 @@ def tmp_dir_report(jobs, dir_cfg, sched_cfg, width, start_row=None, end_row=None
             continue
         phases = sorted(job.job_phases_for_tmpdir(d, jobs))
         ready = manager.phases_permit_new_job(phases, d, sched_cfg, dir_cfg)
-        row = [abbr_path(d, prefix), 'OK' if ready else '--', phases_str(phases)]
+        row = [plot_util.abbr_path(d, prefix), 'OK' if ready else '--', phases_str(phases)]
         tab.add_row(row)
 
     tab.set_max_width(width)
@@ -198,7 +191,7 @@ def dst_dir_report(jobs, dstdirs, width, prefix=''):
 
         priority = archive.compute_priority(eldest_ph, gb_free, n_plots)
 
-        row = [abbr_path(d, prefix), n_plots, gb_free,
+        row = [plot_util.abbr_path(d, prefix), n_plots, gb_free,
                phases_str(phases, 5), priority]
 
         tab.add_row(row)
@@ -209,7 +202,7 @@ def dst_dir_report(jobs, dstdirs, width, prefix=''):
 
 
 def arch_dir_report(archdir_freebytes, width, prefix=''):
-    cells = ['%s:%5dGB' % (abbr_path(d, prefix), int(int(space) / plot_util.GB))
+    cells = ['%s:%5dGB' % (plot_util.abbr_path(d, prefix), int(int(space) / plot_util.GB))
              for (d, space) in sorted(archdir_freebytes.items())]
     if not cells:
         return ''
@@ -255,8 +248,8 @@ def jsondata(jobs, tmp_prefix='', dst_prefix='') -> list:
             dictionary = {
                 'plotid': j.plot_id_prefix,
                 'k': j.k,
-                'tmp': abbr_path(j.tmpdir, tmp_prefix),
-                'dst': abbr_path(j.dstdir, dst_prefix),
+                'tmp': plot_util.abbr_path(j.tmpdir, tmp_prefix),
+                'dst': plot_util.abbr_path(j.dstdir, dst_prefix),
                 'wall': plot_util.time_format(j.get_time_wall()),
                 'phase': phase_str(j.progress()),
                 'tmpdisk': plot_util.human_format(j.get_tmp_usage(), 0),
