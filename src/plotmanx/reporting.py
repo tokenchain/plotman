@@ -8,25 +8,19 @@ from . import archive, job, manager, configuration
 from .util import plot_util
 
 
-def phase_str(phase_pair):
-    (ph, subph) = phase_pair
-    return ((str(ph) if ph is not None else '?') + ':'
-            + (str(subph) if subph is not None else '?'))
-
-
 def phases_str(phases, max_num=None):
     """
     Take a list of phase-subphase pairs and return them as a compact string
     """
     if not max_num or len(phases) <= max_num:
-        return ' '.join([phase_str(pair) for pair in phases])
+        return ' '.join([plot_util.phase_str(pair) for pair in phases])
     else:
         n_first = math.floor(max_num / 2)
         n_last = max_num - n_first
         n_elided = len(phases) - (n_first + n_last)
-        first = ' '.join([phase_str(pair) for pair in phases[:n_first]])
+        first = ' '.join([plot_util.phase_str(pair) for pair in phases[:n_first]])
         elided = " [+%d] " % n_elided
-        last = ' '.join([phase_str(pair) for pair in phases[n_first + n_elided:]])
+        last = ' '.join([plot_util.phase_str(pair) for pair in phases[n_first + n_elided:]])
         return first + elided + last
 
 
@@ -123,7 +117,7 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
                            plot_util.abbr_path(j.tmpdir, tmp_prefix),
                            plot_util.abbr_path(j.dstdir, dst_prefix),
                            plot_util.time_format(j.get_time_wall()),
-                           phase_str(j.progress()),
+                           plot_util.phase_str(j.progress()),
                            plot_util.human_format(j.get_tmp_usage(), 0),
                            j.proc.pid,
                            plot_util.human_format(j.get_produced_size(), 1),
@@ -251,7 +245,7 @@ def jsondata(jobs, tmp_prefix='', dst_prefix='') -> list:
                 'tmp': plot_util.abbr_path(j.tmpdir, tmp_prefix),
                 'dst': plot_util.abbr_path(j.dstdir, dst_prefix),
                 'wall': plot_util.time_format(j.get_time_wall()),
-                'phase': phase_str(j.progress()),
+                'phase': plot_util.phase_str(j.progress()),
                 'tmpdisk': plot_util.human_format(j.get_tmp_usage(), 0),
                 'pid': j.proc.pid,
                 'stat': j.get_run_status(),

@@ -26,6 +26,12 @@ PROGRESS_BAR = {
 }
 
 
+def phase_str(phase_pair):
+    (ph, subph) = phase_pair
+    return ((str(ph) if ph is not None else '?') + ':'
+            + (str(subph) if subph is not None else '?'))
+
+
 def abbr_path(path, putative_prefix):
     if putative_prefix and path.startswith(putative_prefix):
         return os.path.relpath(path, putative_prefix)
