@@ -5,7 +5,6 @@ MANIFEST.in
 README.md
 VERSION
 n.sh
-nvme_linux_0.4.80.zip
 pyproject.toml
 runbuild.sh
 setup.cfg
