@@ -38,6 +38,7 @@ class PlotmanArgParser:
         sp.add_parser('interactive', help='run interactive control/monitoring mode')
         sp.add_parser('dsched', help='print destination dir schedule')
         sp.add_parser('plot', help='run plotting loop')
+        sp.add_parser('tidy', help='manually clean up the unrelated tmp files')
         sp.add_parser('api', help='open api port for external applications')
         sp.add_parser('nfs', help='using go version temp file archive')
         sp.add_parser('archive', help='move completed plots to farming location')
