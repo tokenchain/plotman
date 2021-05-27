@@ -210,6 +210,7 @@ def main():
 
     else:
         jobs = Job.genTasks(cfg.directories.log)
+        farm = FarmPlot(cfg)
 
         # Status report
         if args.cmd == 'status':
@@ -226,8 +227,10 @@ def main():
             start_master_api_node(cfg)
 
         elif args.cmd == 'nfs':
-            farm = FarmPlot(cfg)
             farm.start_nfs()
+
+        elif args.cmd == 'tidy':
+            farm.maintainence(jobs)
 
         # Start running archival
         elif args.cmd == 'archive':

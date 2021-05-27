@@ -84,3 +84,18 @@ class FarmPlot:
         count2 = len(subs)
         for rsub in subs:
             print(rsub)
+
+    def maintainence(self, jobs: list) -> None:
+        active_plot_ids = [r.plot_id for r in jobs]
+        count_files = 0
+        for d in self.checktmps:
+            with os.scandir(d) as it:
+                for entry in it:
+                    if not entry.name.endswith('.plot') and entry.is_file():
+                        for activeid in active_plot_ids:
+                            if activeid not in entry.name:
+                                os.unlink(entry.path)
+                                count_files = count_files + 1
+                                print(f"Found and removed unrelated tmp {entry.name}...")
+                                
+        print(f"complete total  {count_files} files of removal")
