@@ -186,21 +186,33 @@ class MintJ:
             if isSpaceCritical(d):
                 for j in self.jobs:
                     if j.isFrozen is True:
-                        size = plot_util.human_format(j.get_tmp_usage(), 0)
-                        print(f'remove from frozen job for space, with temp size {size} [{j.plot_id}]')
-                        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                            executor.submit(terminate, j)
+                        (size, plotid) = MintJ.terminateJob(j)
+                        print(f'remove from frozen job for space, with temp size {size} [{plotid}]')
 
                     elif j.isWroteErr is True or plot_util.is_phase_start(j.progress()) is True:
                         ls.append(j)
 
             if len(ls) > 0:
                 for i, j in enumerate(sorted(ls, key=Job.get_tmp_usage)):
-                    size = plot_util.human_format(j.get_tmp_usage(), 0)
-                    print(f'remove temp files for space from sorted temp size {size} [{j.plot_id}]')
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                        executor.submit(terminate, j)
+                    (size, plotid) = MintJ.terminateJob(j)
+                    print(f'remove temp files for space from sorted temp size {size} [{plotid}]')
                     break
+
+        for j in self.jobs:
+            if j.isFrozen is True:
+                (size, plotid) = MintJ.terminateJob(j)
+                print(f'remove from frozen job for good {size} [{plotid}]')
+
+            if j.isReadFail is True:
+                print(f'failure from read io: [{j.plot_id}]')
+
+    @staticmethod
+    def terminateJob(j: Job) -> any:
+        size = plot_util.human_format(j.get_tmp_usage(), 0)
+        id = j.plot_id
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(terminate, j)
+        return (size, id)
 
     def ParallelWorker(self):
         for i in range(self.parallel):

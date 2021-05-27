@@ -22,6 +22,7 @@ class LogFile:
         self._phase = (0, 0)
         self._phase_time = dict()
         self._progress = 0
+        self._io_failure = False
         self._disk_tight = False
 
     @property
@@ -126,6 +127,7 @@ class LogFile:
         phase = 0
         plotpool = 0
         disk_space = False
+        read_failure = False
         with open(self.path, 'r') as f:
 
             for line in f:
@@ -183,6 +185,10 @@ class LogFile:
                 if m:
                     disk_space = True
 
+                m = re.match(r'^Only read (\d+) of (\d+) bytes at offset (\d+) from (.+)', lastlns[0])
+                if m:
+                    read_failure = True
+
         if phase_subphases:
             phase = max(phase_subphases.keys())
             self._phase = (phase, phase_subphases[phase])
@@ -195,10 +201,15 @@ class LogFile:
             self._total_T = plotpool / 1000
 
         self._disk_tight = disk_space
+        self._io_failure = read_failure
 
     @property
     def disk_confirm(self):
         return self._disk_tight
+
+    @property
+    def failure_read(self):
+        return self._io_failure
 
     def print(self):
         print(f"total T size: {self._total_T}")

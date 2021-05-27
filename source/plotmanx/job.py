@@ -317,6 +317,10 @@ class Job:
         return self.zLogFile.disk_confirm
 
     @property
+    def isReadFail(self) -> bool:
+        return self.zLogFile.failure_read
+
+    @property
     def exportSize(self) -> float:
         return self.zLogFile.getProductionTPlotSize
 
