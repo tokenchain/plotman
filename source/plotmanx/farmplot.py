@@ -88,6 +88,7 @@ class FarmPlot:
     def maintainence(self, jobs: list) -> None:
         active_plot_ids = [r.plot_id for r in jobs]
         count_files = 0
+        print(active_plot_ids)
         for d in self.checktmps:
             print(f"check {d}")
             with os.scandir(d) as it:
