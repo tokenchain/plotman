@@ -97,10 +97,15 @@ class FarmPlot:
                     if not entry.name.endswith('.plot') and entry.is_file() and not entry.name.endswith(".db"):
                         print(f"📥 check file {entry.name}")
                         if len(active_plot_ids) > 0:
-                            for activeid in active_plot_ids:
-                                if activeid not in entry.name:
-                                    print(f"✅ qualified file {entry.name}")
-                                    remove_paths.append(entry.path)
+                            found = False
+                            for actId in active_plot_ids:
+                                if actId in entry.name:
+                                    found = True
+                                    break
+
+                            if not found:
+                                print(f"✅ qualified file {entry.name}")
+                                remove_paths.append(entry.path)
                         else:
                             print(f"✅ qualified file {entry.name}")
                             remove_paths.append(entry.path)
@@ -115,7 +120,7 @@ class FarmPlot:
                 count_files = count_files + 1
                 print(f"Found and removed unrelated tmp {u}...")
             except FileNotFoundError:
-                print(f"failed to remove file {u}")
+                print(f"Failed to remove file {u}")
                 pass
 
         print("-------------------------")
