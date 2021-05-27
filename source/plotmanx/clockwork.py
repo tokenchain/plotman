@@ -202,7 +202,7 @@ class MintJ:
             if len(ls) > 0:
                 for i, j in enumerate(sorted(ls, key=Job.get_tmp_usage)):
                     size = plot_util.human_format(j.get_tmp_usage(), 0)
-                    print(f'remove temp files for space from sorted temp size {size} [{jf.plot_id}]')
+                    print(f'remove temp files for space from sorted temp size {size} [{j.plot_id}]')
                     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                         executor.submit(terminate, j)
                     break
