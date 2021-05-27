@@ -173,7 +173,7 @@ class MintJ:
 
                     return True
                 else:
-                    self.wait_reason = f'disk space is not enough! there is only {plot_util.availableSpace(tmpdir)} available.'
+                    self.wait_reason = f'disk space is not enough! there is only {plot_util.availableSpace(tmpdir)} available in {tmpdir}.'
 
         return False
 
