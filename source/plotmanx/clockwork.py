@@ -183,20 +183,15 @@ class MintJ:
     def SpaceManagement(self) -> None:
         for d in self.dir_cfg_x.tmp:
             ls = []
-            print("---1")
             if isSpaceCritical(d):
-                print("---2")
                 for j in self.jobs:
-                    print("---3")
                     if j.isFrozen is True:
-                        print("---5")
                         size = plot_util.human_format(j.get_tmp_usage(), 0)
                         print(f'remove from frozen job for space, with temp size {size} [{j.plot_id}]')
                         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                             executor.submit(terminate, j)
 
                     elif j.isWroteErr is True or plot_util.is_phase_start(j.progress()) is True:
-                        print("---4")
                         ls.append(j)
 
             if len(ls) > 0:
