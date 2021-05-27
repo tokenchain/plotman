@@ -28,7 +28,7 @@ PROGRESS_BAR = {
 
 def is_phase_start(phase_pair) -> bool:
     (ph, subph) = phase_pair
-    return ph < 2 and subph < 2
+    return ph < 3 and subph < 6
 
 
 def phase_str(phase_pair) -> str:
