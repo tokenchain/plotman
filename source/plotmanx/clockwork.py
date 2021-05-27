@@ -195,7 +195,7 @@ class MintJ:
                         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                             executor.submit(terminate, j)
 
-                    elif j.isWroteErr is True and plot_util.is_phase_start(j.progress()) is True:
+                    elif j.isWroteErr is True or plot_util.is_phase_start(j.progress()) is True:
                         print("---4")
                         ls.append(j)
 
