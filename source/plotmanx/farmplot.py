@@ -88,22 +88,35 @@ class FarmPlot:
     def maintainence(self, jobs: list) -> None:
         active_plot_ids = [r.plot_id for r in jobs]
         count_files = 0
-        print(active_plot_ids)
+        remove_paths = []
+
         for d in self.checktmps:
             print(f"check {d}")
             with os.scandir(d) as it:
                 for entry in it:
-                    if not entry.name.endswith('.plot') and entry.is_file():
-                        print(f"qualified file {entry.name}")
+                    if not entry.name.endswith('.plot') and entry.is_file() and not entry.name.endswith(".db"):
+                        print(f"📥 check file {entry.name}")
                         if len(active_plot_ids) > 0:
                             for activeid in active_plot_ids:
                                 if activeid not in entry.name:
-                                    os.unlink(entry.path)
-                                    count_files = count_files + 1
-                                    print(f"Found and removed unrelated tmp {entry.name}...")
+                                    print(f"✅ qualified file {entry.name}")
+                                    remove_paths.append(entry.path)
                         else:
-                            os.unlink(entry.path)
-                            count_files = count_files + 1
-                            print(f"Found and removed unrelated tmp {entry.name}...")
+                            print(f"✅ qualified file {entry.name}")
+                            remove_paths.append(entry.path)
 
-        print(f"complete total  {count_files} files of removal")
+        print("-------------------------")
+        print("Active plot ids:")
+        print(active_plot_ids)
+
+        for u in remove_paths:
+            try:
+                os.unlink(u)
+                count_files = count_files + 1
+                print(f"Found and removed unrelated tmp {u}...")
+            except FileNotFoundError:
+                print(f"failed to remove file {u}")
+                pass
+
+        print("-------------------------")
+        print(f"complete total {count_files} files removed")
