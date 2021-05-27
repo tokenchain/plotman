@@ -200,13 +200,12 @@ class MintJ:
                         ls.append(j)
 
             if len(ls) > 0:
-                jf = sorted([m.get_tmp_usage() for m in ls])[0]
-                size = plot_util.human_format(jf.get_tmp_usage(), 0)
-                print(f'remove temp files for space from sorted temp size {size} [{jf.plot_id}]')
-                with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                    executor.submit(terminate, jf)
-
-
+                for i, j in enumerate(sorted(ls, key=Job.get_tmp_usage)):
+                    size = plot_util.human_format(j.get_tmp_usage(), 0)
+                    print(f'remove temp files for space from sorted temp size {size} [{jf.plot_id}]')
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                        executor.submit(terminate, j)
+                    break
 
     def ParallelWorker(self):
         for i in range(self.parallel):
