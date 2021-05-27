@@ -95,6 +95,9 @@ def plotting(cfg: PlotmanConfig):
     print('starting plot loop')
     minp = MintJ(cfg.plotting)
     minp.PlotDaemon()
+    minp.GenJobs(cfg.directories)
+    minp.Upcfg(cfg.scheduling, cfg.plotting)
+    minp.SpaceManagement()
     while True:
         try:
             print(f"s{cfg.scheduling.polling_time_s}\n")

@@ -37,14 +37,14 @@ def phase_str(phase_pair) -> str:
             + (str(subph) if subph is not None else '?'))
 
 
-def abbr_path(path, putative_prefix):
+def abbr_path(path, putative_prefix) -> str:
     if putative_prefix and path.startswith(putative_prefix):
         return os.path.relpath(path, putative_prefix)
     else:
         return path
 
 
-def df_b(d):
+def df_b(d) -> int:
     'Return free space for directory (in bytes)'
     stat = os.statvfs(d)
     return stat.f_frsize * stat.f_bavail
