@@ -235,12 +235,16 @@ class Job:
         total_bytes = 0
         with os.scandir(self.tmpdir) as it:
             for entry in it:
-                if self.zLogFile.getPlotIdFull in entry.name:
-                    try:
-                        total_bytes += entry.stat().st_size
-                    except FileNotFoundError:
-                        # The file might disappear; this being an estimate we don't care
-                        pass
+                if not entry.name.endswith('.plot') and entry.is_file() and not entry.name.endswith(".db"):
+                    if self.zLogFile.getPlotIdFull in entry.name:
+                        try:
+                            total_bytes += entry.stat().st_size
+                        except FileNotFoundError:
+                            # The file might disappear; this being an estimate we don't care
+                            pass
+                        except TimeoutError:
+                            pass
+
         return total_bytes
 
     def get_run_status(self) -> str:

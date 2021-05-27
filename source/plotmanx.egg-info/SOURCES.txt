@@ -94,6 +94,7 @@ source/plotmanx/resources/plotman.yaml
 source/plotmanx/util/__init__.py
 source/plotmanx/util/plot_util.py
 source/plotmanx/util/send_notification.py
+source/plotmanx/util/yamlgen.py
 util/installclient
 util/installmaster
 util/installnvme

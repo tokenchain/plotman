@@ -1,23 +1,20 @@
 import argparse
 import concurrent.futures
-import importlib
-import importlib.resources
 import os
 import random
 import time
-from shutil import copyfile
 
 # Plotman libraries
 from marshmallow import ValidationError
 
 from . import analyze, archive, configuration, interactive, manager, reporting
-from . import resources as plotman_resources
 from .analyze.report import analyze
-from .query.api import start_master_api_node, PostDat
 from .clockwork import MintJ
 from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
 from .job import Job
+from .query.api import start_master_api_node, PostDat
+from .util.yamlgen import YamlGen
 
 
 class PlotmanArgParser:
@@ -103,7 +100,7 @@ def plotting(cfg: PlotmanConfig):
         try:
             print(f"s{cfg.scheduling.polling_time_s}\n")
             time.sleep(cfg.scheduling.polling_time_s)
-            
+
             minp.GenJobs(cfg.directories)
             minp.Upcfg(cfg.scheduling, cfg.plotting)
 
@@ -181,15 +178,9 @@ def main():
                         print("\nExited without overrwriting file")
                         return
 
-            # Copy the default plotman.yaml (packaged in plotman/resources/) to the user's config file path,
-            # creating the parent plotman file/directory if it does not yet exist
-            with importlib.resources.path(plotman_resources, "plotman.yaml") as default_config:
-                config_dir = os.path.dirname(config_file_path)
-
-                os.makedirs(config_dir, exist_ok=True)
-                copyfile(default_config, config_file_path)
-                print(f"\nWrote default plotman.yaml to: {config_file_path}")
-                return
+            yamlGenerator = YamlGen()
+            yamlGenerator.discoverDevices()
+            yamlGenerator.finalized()
 
         if not args.config_subcommand:
             print("No action requested, add 'generate' or 'path'.")

@@ -8,6 +8,7 @@ import psutil
 
 from . import configuration
 from .configuration import PlotmanConfig
+from .util.yamlgen import YamlGen
 
 
 def is_plot_moving(cmdline: list) -> bool:
