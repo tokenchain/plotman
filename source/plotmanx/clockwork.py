@@ -43,6 +43,7 @@ class MintJ:
         self.aging_reason = None
         self.jobs = None
         self.plotdaemon = False
+        self.readIoIssue = 0
         self.schedule_x = None
         self.dir_cfg_x = None
         self.plotcfg_x = plotting_cfg
@@ -198,13 +199,16 @@ class MintJ:
                     print(f'remove temp files for space from sorted temp size {size} [{plotid}]')
                     break
 
+        self.readIoIssue = 0
+
         for j in self.jobs:
             if j.isFrozen is True:
                 (size, plotid) = MintJ.terminateJob(j)
                 print(f'remove from frozen job for good {size} [{plotid}]')
 
             if j.isReadFail is True:
-                print(f'failure from read io: [{j.plot_id}]')
+                print(f'failure from read io: [{j.plot_id}]. possible disk failure or io failure... ')
+                self.readIoIssue = self.readIoIssue + 1
 
     @staticmethod
     def terminateJob(j: Job) -> any:
@@ -252,6 +256,7 @@ class MintJ:
         net = psutil.net_io_counters()
         net_bytes_read, net_bytes_write = net.bytes_recv, net.bytes_sent
         iowait = psutil.cpu_times().iowait
+
         disks = [d.mountpoint for d in psutil.disk_partitions()]
         disks_usage = [psutil.disk_usage(d) for d in disks]
         disks_used = sum(d.used for d in disks_usage)
@@ -262,9 +267,9 @@ class MintJ:
             historyplots=sum([i.exportProductionPlots for i in jobs]),
             sizet=sum([h.exportSize for h in jobs]),
             plotcount=fcount,
+            io_read_issues=self.readIoIssue,
             movingcount=len(listplmo),
             movingdetail=listplmo,
-
             nfsips=nfslist,
             cpucount=psutil.cpu_count(),
             stamp=int(datetime.datetime.now().timestamp()),
