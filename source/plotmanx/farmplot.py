@@ -95,10 +95,15 @@ class FarmPlot:
                 for entry in it:
                     if not entry.name.endswith('.plot') and entry.is_file():
                         print(f"qualified file {entry.name}")
-                        for activeid in active_plot_ids:
-                            if activeid not in entry.name:
-                                os.unlink(entry.path)
-                                count_files = count_files + 1
-                                print(f"Found and removed unrelated tmp {entry.name}...")
+                        if len(active_plot_ids) > 0:
+                            for activeid in active_plot_ids:
+                                if activeid not in entry.name:
+                                    os.unlink(entry.path)
+                                    count_files = count_files + 1
+                                    print(f"Found and removed unrelated tmp {entry.name}...")
+                        else:
+                            os.unlink(entry.path)
+                            count_files = count_files + 1
+                            print(f"Found and removed unrelated tmp {entry.name}...")
 
         print(f"complete total  {count_files} files of removal")
