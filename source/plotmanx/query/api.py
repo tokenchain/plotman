@@ -144,6 +144,13 @@ class ApiV1Review(ApiBase):
 """
 
 
+class WebpHandler(web.StaticFileHandler):
+    def parse_url_path(self, url_path):
+        if not url_path or url_path.endswith('/'):
+            url_path = url_path + 'index.html'
+        return url_path
+
+
 def start_master_api_node(cfg: PlotmanConfig):
     try:
         version = pkg_resources.get_distribution('plotmanx').version
@@ -157,11 +164,16 @@ def start_master_api_node(cfg: PlotmanConfig):
             static_path=get_dash_v1_static(),
         )
 
+        static_handler_args = dict(
+            path=get_dash_v1(),
+            default_filename="index.html"
+        )
+
         appcli = web.Application([
             (r"/report", NodeHandle),
             (r"/nodes", DashSimpleListNodes),
             (r"/api/v1", ApiV1Review),
-            (r"/monitor/(.*)", web.StaticFileHandler, dict(path=get_dash_v1(), default_filename="index.html"))
+            (r"/monitors/(.*)", WebpHandler, static_handler_args)
         ], **settings)
 
         print(f"Serve nuxt path {get_dash_v1()} and set default entry point as index.html")

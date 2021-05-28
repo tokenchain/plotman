@@ -97,7 +97,7 @@ def get_db_path() -> str:
 
 
 def get_dash_v1() -> str:
-    return f"{appdirs.user_config_dir('plotman')}/v1app"
+    return f"{appdirs.user_config_dir('plotman')}/v1app/"
 
 
 def get_dash_v1_static() -> str:
