@@ -4,6 +4,7 @@ import os
 import re
 
 import pendulum
+import pkg_resources
 import psutil
 from psutil.tests import sh
 
@@ -203,6 +204,10 @@ def chia_version() -> str:
         version = 'undetected'
 
     return version
+
+
+def plotman_version() -> str:
+    return pkg_resources.get_distribution('plotmanx')
 
 
 def get_plot_progress(line_count: int) -> float:

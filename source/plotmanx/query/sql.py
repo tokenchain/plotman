@@ -25,11 +25,6 @@ class SQLX:
         self.con.close()
 
     def schema_plan(self):
-        self.cur.execute('''CREATE TABLE IF NOT EXISTS systemchia (
-                           tid text PRIMARY KEY,
-                           block text NOT NULL,
-                           ip text NOT NULL
-                   );''')
 
         self.cur.execute('''CREATE TABLE IF NOT EXISTS nodeInfo (
         
@@ -67,7 +62,7 @@ class SQLX:
                                 
                            );''')
 
-        self.cur.execute('''CREATE TABLE IF NOT EXISTS plot (
+        self.cur.execute('''CREATE TABLE IF NOT EXISTS plotv2 (
                            pcid INTEGER PRIMARY KEY AUTOINCREMENT,
                            plotid text NOT NULL,
                            k INTEGER NOT NULL,
@@ -75,47 +70,52 @@ class SQLX:
                            b INTEGER NOT NULL,
                            u INTEGER NOT NULL,
                            pid INTEGER NOT NULL,
-                           ip text NOT NULL,
-                           time text NOT NULL
+                           progress REAL NOT NULL,
+                           phase text NOT NULL,
+                           host text NOT NULL,
+                           time INTEGER NOT NULL
                    );''')
 
-    def datainput(self, j: dict, hostname: str, ts: str) -> None:
+    def datainput(self, j: dict, ts: int) -> None:
 
         if len(j['jobls']) > 0:
 
             try:
                 for h in j['jobls']:
 
-                    plotid = h['plot_id']
-
-                    #                        if len(plotid) > 8:
-                    #                            plotid = h['plot_id'][:8]
+                    plot_id = h['plot_id']
 
                     content_find = f"""
 
-                    SELECT COUNT(*) FROM plot WHERE plotid='{plotid}';
+                    SELECT COUNT(*) FROM plotv2 WHERE plotid='{plot_id}';
                     """
 
                     (n,) = self.cur.execute(content_find).fetchone()
 
                     if int(n) == 0:
                         content_insert = f"""
-                            INSERT INTO plot (plotid, k, r, b, u, pid, ip, time)
+                            INSERT INTO plotv2 (plotid, k, r, b, u, pid, progress, phase, host, time)
                             VALUES (
-                            '{plotid}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])},
-                            {int(h['u'])}, {int(h['pid'])}, '{hostname}', '{ts}'
+                            '{plot_id}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])},
+                            {int(h['u'])}, {int(h['pid'])}, 
+                            {float(h['progress'])}, '{txtBlock(h['phase'])}'
+                            '{txtBlock(j['identity'])}', {ts}
                             )
                            ;
                         """
 
                         self.cur.execute(content_insert)
 
-                        print(f"ID - {plotid}")
+                        print(f"ID - {plot_id}")
                     else:
                         content_update = f"""
-                        UPDATE plot 
-                        SET time='{ts}'
-                        WHERE plotid='{plotid}'
+                        UPDATE plotv2
+
+                        SET time={ts},
+                        progress={float(h['progress'])},
+                        phase='{txtBlock(h['phase'])}'
+
+                        WHERE plotid='{plot_id}'
                         ;
                         """
                         self.cur.execute(content_update)
@@ -145,7 +145,7 @@ class SQLX:
 
             ) VALUES(
 
-                '{hostname}',
+                '{txtBlock(j['identity'])}',
                 {int(j['plotcount'])},
                 {int(j['movingcount'])},
                 {int(j['cpucount'])},

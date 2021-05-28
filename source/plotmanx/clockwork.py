@@ -55,7 +55,7 @@ class MintJ:
         self.net_bytes_write_last = 0
         self.iowait_last = 0
         self.chia_version = plot_util.chia_version()
-        self.plotman_version = pkg_resources.get_distribution('plotmanx').version
+        self.plotman_version = plot_util.plotman_version()
         self.host_machine = socket.gethostname()
 
     def Upcfg(self, schedule: Scheduling, plotting_cfg: Plotting):
@@ -81,6 +81,10 @@ class MintJ:
     @property
     def LsJobs(self) -> list:
         return self.jobs
+
+    @property
+    def ChiaVersion(self) -> str:
+        return self.chia_version
 
     @property
     def isClockReady(self) -> bool:

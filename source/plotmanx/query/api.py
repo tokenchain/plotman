@@ -4,7 +4,6 @@
 from datetime import datetime
 from os.path import isfile, join
 
-import pkg_resources
 import requests
 from tornado import web, ioloop, httpserver
 from tornado.template import Loader
@@ -15,6 +14,8 @@ from ..configuration import PlotmanConfig, get_dash_v1
 
 __author__ = 'lousvicton'
 
+from ..util import plot_util
+
 try:
     import simplejson as json
 except ImportError:
@@ -22,8 +23,6 @@ except ImportError:
 
 
 def PostDat(dp: dict, cfg: PlotmanConfig):
-
-
     # sending post request and saving response as response object
     payload = json.dumps(dp)
     requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
@@ -33,7 +32,7 @@ class ApiBase(web.RequestHandler):
     SUPPORTED_METHODS = ["GET"]
 
     def initialize(self, *args, **kwargs):
-        self.version_plotman = pkg_resources.get_distribution('plotmanx').version
+        self.version_plotman = plot_util.plotman_version()
         self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
         self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
 
@@ -68,22 +67,16 @@ class NodeHandle(web.RequestHandler):
             print("error from decoding json file.")
             return
 
-        try:
-            ip_remo = jpayload['identity']
-        except:
-            ip_remo = self.request.headers.get("X-Real-IP") or \
-                      self.request.headers.get("X-Forwarded-For") or \
-                      self.request.remote_ip
-
-        tstime = datetime.now().strftime('%m-%d %H:%M:%S')
+        # tstime = datetime.now().strftime('%m-%d %H:%M:%S')
+        tstime = datetime.now().timestamp()
 
         if req_body is not None:
-            sq.datainput(jpayload, ip_remo, tstime)
+            sq.datainput(jpayload, tstime)
 
         sq.end()
 
         print("Report data ------")
-        print(f"remote ip: {ip_remo} and ver. {jpayload['version']}")
+        print(f"remote ip: and ver. {jpayload['version']}")
 
 
 class DashSimpleListNodes(ApiBase):
@@ -115,6 +108,7 @@ class ApiV1Review(ApiBase):
             "delete task": 'DELETE /api/v1/accounts/<username>/tasks/<id>'
         }
         self.write(json.dumps(routes))
+
 
 class WebpHandler(web.StaticFileHandler):
     def write_error(self, status_code, **kwargs):
@@ -203,7 +197,7 @@ On_IWhite = '\033[0;107m'  # White
 
 def start_master_api_node(cfg: PlotmanConfig):
     try:
-        version = pkg_resources.get_distribution('plotmanx').version
+        version = plot_util.plotman_version()
         print(f"Now plotman API - v{version}")
         print(f"API running port {cfg.apis.port} is now listening.. ")
 

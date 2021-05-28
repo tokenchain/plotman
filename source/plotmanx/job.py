@@ -189,6 +189,11 @@ class Job:
         """
         return self.zLogFile.getPhase
 
+    @property
+    def progressDisplay(self) -> str:
+        (a, b) = self.progress()
+        return f"{a}:{b}"
+
     def isJobStartWithId(self, shortID: str) -> bool:
         if self.zLogFile.getPlotIdFull.startswith(shortID):
             return True
@@ -309,7 +314,8 @@ class Job:
             dst=self.dstdir,
             logfile=self.getLogPath,
             freeze=('YES' if self.isFrozen else 'NO'),
-            progress=self.zLogFile.getPlotIdFull
+            progress=self.zLogFile.getProgressPercentage,
+            phase=self.progressDisplay
         )
 
     @property

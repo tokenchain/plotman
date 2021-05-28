@@ -158,8 +158,7 @@ def main():
     args = pm_parser.parse_args()
 
     if args.cmd == 'version':
-        import pkg_resources
-        print(pkg_resources.get_distribution('plotmanx'))
+        print(plot_util.plotman_version())
         return
 
     elif args.cmd == 'config':
