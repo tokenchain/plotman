@@ -10,7 +10,7 @@ from tornado import web, ioloop, httpserver
 from tornado.template import Loader
 
 from .sql import SQLX
-from ..configuration import PlotmanConfig, get_dash_v1
+from ..configuration import PlotmanConfig, get_dash_v1,get_dash_v1_static
 
 __author__ = 'lousvicton'
 
@@ -239,7 +239,8 @@ def start_master_api_node(cfg: PlotmanConfig):
 
         settings = dict(
             debug=True,
-            gzip=True
+            gzip=True,
+            static_path=get_dash_v1(),
         )
 
         """
