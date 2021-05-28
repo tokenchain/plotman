@@ -73,6 +73,9 @@ class SQLX:
                            progress REAL NOT NULL,
                            phase text NOT NULL,
                            host text NOT NULL,
+                           freeze text NOT NULL,
+                           readerr text NOT NULL,
+                           wroteerr text NOT NULL,
                            time INTEGER NOT NULL
                    );''')
 
@@ -94,11 +97,15 @@ class SQLX:
 
                     if int(n) == 0:
                         content_insert = f"""
-                            INSERT INTO plotv2 (plotid, k, r, b, u, pid, progress, phase, host, time)
+                       INSERT INTO plotv2 (
+                            plotid, k, r, b, u, pid, 
+                            progress, phase,
+                            freeze,readerr,wroteerr,
+                            host, time)
                             VALUES (
-                            '{plot_id}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])},
-                            {int(h['u'])}, {int(h['pid'])}, 
+                            '{plot_id}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, 
                             {float(h['progress'])}, '{txtBlock(h['phase'])}'
+                            '{txtBlock(h['freeze'])}','{txtBlock(h['readerr'])}','{txtBlock(h['wroteerr'])}',
                             '{txtBlock(j['identity'])}', {ts}
                             )
                            ;
@@ -111,9 +118,9 @@ class SQLX:
                         content_update = f"""
                         UPDATE plotv2
 
-                        SET time={ts},
-                        progress={float(h['progress'])},
-                        phase='{txtBlock(h['phase'])}'
+                            SET time={ts},
+                            progress={float(h['progress'])},
+                            phase='{txtBlock(h['phase'])}'
 
                         WHERE plotid='{plot_id}'
                         ;
