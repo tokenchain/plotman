@@ -2,10 +2,12 @@
 #
 
 from datetime import datetime
+from os.path import isfile, join
 
 import pkg_resources
 import requests
 from tornado import web, ioloop, httpserver
+from tornado.template import Loader
 
 from .sql import SQLX
 from ..configuration import PlotmanConfig, get_dash_v1, get_dash_v1_static
@@ -145,10 +147,14 @@ class ApiV1Review(ApiBase):
 
 
 class WebpHandler(web.StaticFileHandler):
-    def parse_url_path(self, url_path):
-        if not url_path or url_path.endswith('/'):
-            url_path = url_path + 'index.html'
-        return url_path
+    def write_error(self, status_code, **kwargs):
+
+        if status_code in (404, 500):
+            error_page = '{}.html'.format(status_code)
+            if isfile(join(get_dash_v1(), error_page)):
+                self.write(Loader(get_dash_v1()).load(error_page).generate())
+            else:
+                super().write_error(status_code, **kwargs)
 
 
 def start_master_api_node(cfg: PlotmanConfig):
@@ -177,10 +183,12 @@ def start_master_api_node(cfg: PlotmanConfig):
         ], **settings)
 
         print(f"Serve nuxt path {get_dash_v1()} and set default entry point as index.html")
-
+        print('Running at: http://%s:%s/', '127.0.0.1', cfg.apis.port)
         http_server = httpserver.HTTPServer(appcli)
         http_server.listen(cfg.apis.port)
         ioloop.IOLoop.current().start()
 
-    except:
+    except ValueError:
         print("Port is in use. Please close the daemon app and start again. ")
+    except KeyboardInterrupt:
+        print('Stopping server...')
