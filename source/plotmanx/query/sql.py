@@ -136,7 +136,7 @@ class SQLX:
 
     def getNodes(self) -> list:
         block = """
-        SELECT * FROM sysio GROUP BY ip
+        SELECT * FROM sysio GROUP BY ip ORDER BY stamp DESC
         """
 
         list = self.cur.execute(block).fetchall()

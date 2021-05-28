@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE
 import pkg_resources
 
 from .. import resources as plotman_resources
-from ..configuration import PlotmanConfig, get_path
+from ..configuration import get_path
 
 statement = 'End : {}, IO File {}'
 
@@ -82,25 +82,32 @@ class YamlGen:
 
     def __init__(self):
         self.tmp_list = []
+        self.dst_list = []
+        self.device_dst_list = []
         self.device_list = []
 
     def discoverDevices(self):
-        df = Popen(["df", "-h"], stdout=PIPE)
+        df = Popen(["df", "-hT"], stdout=PIPE)
         output = df.communicate()[0]
         listdevice = output.split("\n")
         m = 0
-        tmpfolders = []
+        tmpnvmede = []
+        nfsde = []
         for h in listdevice:
             if m > 0:
-                device, size, used, available, percent, mountpoint = h.split()
+                device, type, size, used, available, percent, mountpoint = h.split()
                 # if that is nvme ssd device we will take it as temp folder
                 h = re.match('^\/dev\/md(\d+)', device)
                 if h:
-                    tmpfolders.append(mountpoint)
+                    tmpnvmede.append(mountpoint)
+
+                if type == "nfs4":
+                    nfsde.append(mountpoint)
 
             m += 1
 
-        self.device_list = tmpfolders
+        self.device_list = tmpnvmede
+        self.device_dst_list = nfsde
 
     def generateDummpy(self) -> None:
         if os.path.isfile(get_path()):
@@ -110,6 +117,7 @@ class YamlGen:
                     f"A 'plotman.yaml' file already exists at the default location: '{get_path()}' \n\n"
                     "\tInput 'y' to overwrite existing file, or 'n' to exit without overwrite."
                 ).lower()
+
                 if overwrite == 'n':
                     print("\nExited without overrwriting file")
                     return
@@ -123,14 +131,26 @@ class YamlGen:
             print(f"\nWrote default plotman.yaml to: {get_path()}")
             return
 
+    def ensureFolderExist(self, listp: list):
+        for d in listp:
+            Popen(["mkdir", "-p", d], stdout=PIPE)
+
     def finalized(self) -> None:
         log_file_time = datetime.strptime('Sun Apr  4 19:00:50 2021', '%a %b  %d %H:%M:%S %Y')
         version_code = pkg_resources.get_distribution('plotmanx')
+
         for mountpoint in self.device_list:
             self.tmp_list.append(self.genTempFolder(mountpoint))
 
+        for mountptdst in self.device_dst_list:
+            self.dst_list.append(self.genDstFolder(mountptdst))
+
+        self.ensureFolderExist(self.tmp_list)
+
+        self.ensureFolderExist(self.dst_list)
+
         k = self.setting_yaml.format(
-            list_dst="\n".join(self.tmp_list),
+            list_dst="\n".join(self.dst_list),
             list_temp="\n".join(self.tmp_list),
             tmp2_content=self.temp2Hx(self.tmp_list[0]),
             ver=version_code,

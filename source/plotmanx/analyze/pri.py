@@ -50,8 +50,8 @@ class LogFile:
         return self._total_T
 
     @property
-    def getProgress(self) -> float:
-        return self._progress
+    def getProgressPercentage(self) -> float:
+        return self._progress * 100
 
     @property
     def completedJobs(self):
@@ -71,12 +71,16 @@ class LogFile:
         found_id = False
         found_log = False
         plots = 0
+        line_z = 0
+        line_zz = 0
 
         for attempt_number in range(1):
             plots = 0
+            line_z = 0
             with open(self.path, 'r') as f:
 
                 for line in f:
+                    line_z = line_z + 1
                     m = re.match('^ID: ([0-9a-f]*)', line)
                     if m:
                         self._current_plot_id = m.group(1)
@@ -92,9 +96,10 @@ class LogFile:
                     m = re.match(r'^Renamed final file from', line)
                     if m:
                         plots += 1
+                        line_zz = line_z
 
                 filedat = f.read()
-                lin_count = (filedat.count('\n') + 1)
+                lin_count = (filedat.count('\n') + 1 - line_zz)
 
             if found_id and found_log:
                 break  # Stop trying
@@ -126,11 +131,15 @@ class LogFile:
         plots = 0
         phase = 0
         plotpool = 0
+        line_z = 0
+        line_zz = 0
+
         disk_space = False
         read_failure = False
         with open(self.path, 'r') as f:
 
             for line in f:
+                line_z = line_z + 1
 
                 m = re.match('^ID: ([0-9a-f]*)', line)
                 if m:
@@ -177,9 +186,14 @@ class LogFile:
                     phase = 0
                     phase_subphases = {}
                     plots += 1
+                    line_zz = line_z
 
             lines = f.readlines()
             lastlns = lines[-1:]
+
+            filedat = f.read()
+            lin_count = (filedat.count('\n') + 1 - line_zz)
+
             if len(lastlns) > 0:
                 m = re.match(r'^Only wrote', lastlns[0])
                 if m:
@@ -188,6 +202,8 @@ class LogFile:
                 m = re.match(r'^Only read (\d+) of (\d+) bytes at offset (\d+) from (.+)', lastlns[0])
                 if m:
                     read_failure = True
+
+        self._progress = get_plot_progress(lin_count)
 
         if phase_subphases:
             phase = max(phase_subphases.keys())
