@@ -43,6 +43,13 @@ nvmecc/pkg/calle.go
 nvmecc/pkg/skv.go
 nvmecc/temp/writeLock.db
 source/__init__.py
+source/_lab/__init__.py
+source/_lab/test_d2.py
+source/_lab/test_d3.py
+source/_lab/test_d4.py
+source/_lab/test_data
+source/_lab/test_disk.py
+source/_lab/test_web.py
 source/export/csv.py
 source/export/parser.py
 source/export/plotinfo.py
@@ -101,4 +108,7 @@ util/installmaster
 util/installnvme
 util/listlogs
 util/plotcopy
+util/r1
+util/r2
+util/r3
 util/startnode
