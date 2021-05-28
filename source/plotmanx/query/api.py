@@ -161,7 +161,7 @@ def start_master_api_node(cfg: PlotmanConfig):
             (r"/report", NodeHandle),
             (r"/nodes", DashSimpleListNodes),
             (r"/api/v1", ApiV1Review),
-            (r"monitor/(.*)", web.StaticFileHandler, dict(path=get_dash_v1(), default_filename="index.html"))
+            (r"/monitor/(.*)", web.StaticFileHandler, dict(path=get_dash_v1(), default_filename="index.html"))
         ], **settings)
 
         print(f"Serve nuxt path {get_dash_v1()} and set default entry point as index.html")
