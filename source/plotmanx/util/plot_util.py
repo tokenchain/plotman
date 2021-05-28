@@ -1,9 +1,11 @@
+import contextlib
 import math
 import os
 import re
-import socket
 
 import pendulum
+import psutil
+from psutil.tests import sh
 
 GB = 1_000_000_000
 
@@ -187,23 +189,20 @@ def parse_chia_plot_time(s):
     return pendulum.from_format(s, 'ddd MMM DD HH:mm:ss YYYY', locale='en', tz=None)
 
 
-def get_ip_address(ifname: str) -> str:
-    """ s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-     return socket.inet_ntoa(fcntl.ioctl(
-         s.fileno(),
-         0x8915,  # SIOCGIFADDR
-         struct.pack('256s', ifname[:15])
-     )[20:24])
-     """
-    return socket.gethostname()
-
-
 def countnonoverlappingrematches(pattern, thestring):
     return re.subn(pattern, '', thestring)[1]
 
 
-def getIP() -> str:
-    return get_ip_address('eth0')  # '192.168.0.110'
+def chia_version() -> str:
+    plot_args = ['chia', 'version']
+    try:
+        version = os.popen(" ".join(plot_args), 'r').read()
+    except TypeError:
+        version = 'undetected'
+    except ValueError:
+        version = 'undetected'
+
+    return version
 
 
 def get_plot_progress(line_count: int) -> float:
@@ -278,3 +277,111 @@ def tidy_up(jobs: list, temp_folders: list) -> None:
 
     print("-------------------------")
     print(f"complete total {count_files} files removed")
+
+
+def discover_local_hhd() -> list:
+    # test psutil.disk_usage() and psutil.disk_partitions()
+    # against "df -a"
+    def dff(path):
+        output = sh('df -P -B 1 "%s"' % path).strip()
+        # df = Popen(["df", "-P", "-B", "1", path], stdout=PIPE)
+        # output = df.communicate()[0]
+
+        lines = output.split('\n')
+        lines.pop(0)
+        line = lines.pop(0)
+        dev, total, used, free = line.split()[:4]
+        if dev == 'none':
+            dev = ''
+        total, used, free = int(total), int(used), int(free)
+        return dev, total, used, free
+
+    devices = []
+    for part in psutil.disk_partitions(all=False):
+        dev, total, used, free = dff(part.mountpoint)
+
+        g = re.match("^\/dev\/sd([a-z])$", dev)
+
+        if g:
+            usage = psutil.disk_usage(part.mountpoint)
+            print(f"found - {dev} {part.mountpoint} {usage}")
+            percent = float(used / total * 100)
+
+            # assert usage.total == total
+            # 10 MB tollerance
+
+            if abs(usage.free - free) > 10 * 1024 * 1024:
+                print("psutil=%s, df=%s" % (usage.free, free))
+            if abs(usage.used - used) > 10 * 1024 * 1024:
+                print("psutil=%s, df=%s" % (usage.used, used))
+
+            lowCap = False
+            if usage.free < 108 * GB:
+                lowCap = True
+
+            devices.append(dict(disk=dev, per=percent, low=lowCap))
+
+    return devices
+
+
+def discover_nvme_io() -> list:
+    devices = []
+    try:
+        disk_counters = psutil.disk_io_counters(perdisk=True)
+        print(disk_counters)
+        for device_name in disk_counters:
+            m0 = re.match("^nvme(.*)$", device_name)
+            if m0:
+                counters = disk_counters[device_name]
+                mbpersec = counters.write_bytes / 1024 / 1024
+                print(f'Disk I/O counters - {device_name}: {mbpersec} mb/s')
+                devices.append(dict(dev=device_name, speed=mbpersec))
+
+    except OSError as e:
+        print(u'Caught exception when crawling disk I/O counters: {0}'.format(e))
+
+    return devices
+
+
+def is_plot_moving(cmdline: list) -> bool:
+    return (
+            len(cmdline) > 3
+            and cmdline[0].endswith('plmo')
+    )
+
+
+def is_plmo_nfs(cmdline: list) -> bool:
+    test = " ".join(cmdline)
+    m = re.match(r"^\/mnt\/nfs.*.?(\d+).\/", test)
+    if m:
+        return True
+    else:
+        return False
+
+
+def discover_plmo_operations():
+    jobs = []
+
+    for proc in psutil.process_iter(['pid', 'cmdline']):
+        # Ignore processes which most likely have terminated between the time of iteration and data access.
+        with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
+            if is_plot_moving(proc.cmdline()):
+                job = " ".join(proc.cmdline())
+                jobs.append(job)
+
+    return jobs
+
+
+def discover_nfs_operations() -> list:
+    nfs_list = []
+
+    for proc in psutil.process_iter(['pid', 'cmdline']):
+        # Ignore processes which most likely have terminated between the time of iteration and data access.
+        with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
+            if is_plot_moving(proc.cmdline()):
+                if is_plmo_nfs(proc.cmdline()):
+                    test = " ".join(proc.cmdline())
+                    g = re.match('(\d+)', test)
+                    nfs_list.append(g[0])
+
+    return nfs_list

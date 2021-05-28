@@ -86,6 +86,10 @@ class YamlGen:
         self.device_dst_list = []
         self.device_list = []
 
+    @property
+    def getDevicesDst(self) -> list:
+        return self.device_dst_list
+
     def discoverDevices(self):
         df = Popen(["df", "-hT"], stdout=PIPE)
         output = df.communicate()[0]

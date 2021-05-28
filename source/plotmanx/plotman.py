@@ -14,8 +14,8 @@ from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
 from .job import Job
 from .query.api import start_master_api_node, PostDat
+from .util import plot_util
 from .util.yamlgen import YamlGen
-
 
 
 class PlotmanArgParser:
@@ -109,7 +109,11 @@ def plotting(cfg: PlotmanConfig):
                 minp.ParallelWorker()
 
             if cfg.apis.target is not "":
-                PostDat(minp.GenStatus(minp.LsJobs), cfg)
+                PostDat(minp.NeuoInfo(
+                    minp.LsJobs,
+                    plot_util.discover_local_hhd(),
+                    plot_util.discover_nvme_io()
+                ), cfg)
 
             minp.SpaceManagement()
 
@@ -188,7 +192,6 @@ def main():
             return
 
     cfg = configuration.get_validated_configs()
-
     #
     # Stay alive, spawning plot jobs
     #
