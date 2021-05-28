@@ -182,6 +182,8 @@ class MintJ:
         self.plotdaemon = True
 
     def SpaceManagement(self) -> None:
+        isCritical = False
+
         for d in self.dir_cfg_x.tmp:
             ls = []
             if isSpaceCritical(d):
@@ -192,6 +194,7 @@ class MintJ:
 
                     elif j.isWroteErr is True or plot_util.is_phase_start(j.progress()) is True:
                         ls.append(j)
+                isCritical = True
 
             if len(ls) > 0:
                 for i, j in enumerate(sorted(ls, key=Job.get_tmp_usage)):
@@ -209,6 +212,9 @@ class MintJ:
             if j.isReadFail is True:
                 print(f'failure from read io: [{j.plot_id}]. possible disk failure or io failure... ')
                 self.readIoIssue = self.readIoIssue + 1
+
+        if isCritical:
+            plot_util.tidy_up(self.jobs, self.dir_cfg_x.tmp)
 
     @staticmethod
     def terminateJob(j: Job) -> any:

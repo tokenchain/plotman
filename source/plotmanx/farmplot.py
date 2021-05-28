@@ -8,7 +8,7 @@ import psutil
 
 from . import configuration
 from .configuration import PlotmanConfig
-from .util.yamlgen import YamlGen
+from .util import plot_util
 
 
 def is_plot_moving(cmdline: list) -> bool:
@@ -87,42 +87,4 @@ class FarmPlot:
             print(rsub)
 
     def maintainence(self, jobs: list) -> None:
-        active_plot_ids = [r.plot_id for r in jobs]
-        count_files = 0
-        remove_paths = []
-
-        for d in self.checktmps:
-            print(f"check {d}")
-            with os.scandir(d) as it:
-                for entry in it:
-                    if not entry.name.endswith('.plot') and entry.is_file() and not entry.name.endswith(".db"):
-                        print(f"📥 check file {entry.name}")
-                        if len(active_plot_ids) > 0:
-                            found = False
-                            for actId in active_plot_ids:
-                                if actId in entry.name:
-                                    found = True
-                                    break
-
-                            if not found:
-                                print(f"✅ qualified file {entry.name}")
-                                remove_paths.append(entry.path)
-                        else:
-                            print(f"✅ qualified file {entry.name}")
-                            remove_paths.append(entry.path)
-
-        print("-------------------------")
-        print("Active plot ids:")
-        print(active_plot_ids)
-
-        for u in remove_paths:
-            try:
-                os.unlink(u)
-                count_files = count_files + 1
-                print(f"Found and removed unrelated tmp {u}...")
-            except FileNotFoundError:
-                print(f"Failed to remove file {u}")
-                pass
-
-        print("-------------------------")
-        print(f"complete total {count_files} files removed")
+        plot_util.tidy_up(jobs, self.checktmps)

@@ -171,7 +171,7 @@ def start_master_api_node(cfg: PlotmanConfig):
 
         appcli = web.Application([
             (r"/report", NodeHandle),
-            (r"/nodes", DashSimpleListNodes),
+            (r"/api/v1/nodes", DashSimpleListNodes),
             (r"/api/v1", ApiV1Review),
             (r"/monitors/(.*)", WebpHandler, static_handler_args)
         ], **settings)

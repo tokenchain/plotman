@@ -7,11 +7,27 @@ import pendulum
 
 GB = 1_000_000_000
 
+# IN GB size
 KSIZE = {
     "32": 256.6,
     "33": 550,
     "34": 1118,
     "35": 2335,
+}
+
+# IN GB size
+PLOT_SIZE = {
+    "32": 108.837,
+    "33": 224.227,
+    "34": 461.535,
+    "35": 949.3,
+}
+
+PLOT_LIST = {
+    "32": r'^plot-k32-.*plot$',
+    "33": r'^plot-k33-.*plot$',
+    "34": r'^plot-k34-.*plot$',
+    "35": r'^plot-k35-.*plot$',
 }
 
 PROGRESS_BAR = {
@@ -45,14 +61,16 @@ def abbr_path(path, putative_prefix) -> str:
 
 
 def df_b(d) -> int:
-    'Return free space for directory (in bytes)'
+    """
+    Return free space for directory (in bytes)
+    """
     stat = os.statvfs(d)
     return stat.f_frsize * stat.f_bavail
 
 
-def checkTempSpace(knm: int, tmpdir: str) -> bool:
+def checkTempSpace(k_number: int, tmpdir: str) -> bool:
     for k, v in KSIZE.items():
-        if int(k) == knm:
+        if int(k) == k_number:
             gb_free = df_b(tmpdir) / GB
             if gb_free > float(v):
                 return True
@@ -60,6 +78,10 @@ def checkTempSpace(knm: int, tmpdir: str) -> bool:
 
 
 def isSpaceCritical(tmpdir: str) -> bool:
+    """
+    determine when the current working directory is on critical free space limitzxzx
+    """
+
     gb_free = df_b(tmpdir) / GB
     if gb_free < 0.1:
         return True
@@ -72,8 +94,9 @@ def availableSpace(tmpdir: str) -> str:
     return f"{gb_free} GB"
 
 
-def get_k32_plotsize():
-    return 108 * GB
+def get_k32_plotsize() -> float:
+    v = PLOT_SIZE["32"]
+    return v * GB
 
 
 def human_format(num, precision):
@@ -123,14 +146,19 @@ def split_path_prefix(items):
         return (prefix, remainders)
 
 
-def list_k32_plots(d):
+def list_k32_plots(d) -> list:
     """List completed k32 plots in a directory (not recursive)"""
+    return list_k_plots(d, 32)
+
+
+def list_k_plots(d: str, K: int) -> list:
     plots = []
     for plot in os.listdir(d):
-        if re.match(r'^plot-k32-.*plot$', plot):
+        if re.match(PLOT_LIST[str(K)], plot):
             plot = os.path.join(d, plot)
             try:
-                if os.stat(plot).st_size > (0.95 * get_k32_plotsize()):
+                require_size = PLOT_SIZE[str(K)] * 0.95 * GB
+                if os.stat(plot).st_size > require_size:
                     plots.append(plot)
             except FileNotFoundError:
                 continue
@@ -138,7 +166,7 @@ def list_k32_plots(d):
     return plots
 
 
-def column_wrap(items, n_cols, filler=None):
+def column_wrap(items, n_cols, filler=None) -> list:
     '''Take items, distribute among n_cols columns, and return a set
        of rows containing the slices of those columns.'''
     rows = []
@@ -150,7 +178,7 @@ def column_wrap(items, n_cols, filler=None):
     return rows
 
 
-def is_freezed(job):
+def is_freezed(job) -> str:
     return 'YES' if job.last_updated_time_in_min > 60 else 'NO'
 
 
@@ -208,3 +236,45 @@ def get_plot_progress(line_count: int) -> float:
     else:
         progress += phase4_weight * ((line_count - phase3_line_end) / (phase4_line_end - phase3_line_end))
     return progress
+
+
+def tidy_up(jobs: list, temp_folders: list) -> None:
+    active_plot_ids = [r.plot_id for r in jobs]
+    count_files = 0
+    remove_paths = []
+
+    for d in temp_folders:
+        print(f"🚧 check {d}")
+        with os.scandir(d) as it:
+            for entry in it:
+                if not entry.name.endswith('.plot') and entry.is_file() and not entry.name.endswith(".db"):
+                    print(f"📥 check file {entry.name}")
+                    if len(active_plot_ids) > 0:
+                        found = False
+                        for actId in active_plot_ids:
+                            if actId in entry.name:
+                                found = True
+                                break
+
+                        if not found:
+                            print(f"✅ qualified file {entry.name}")
+                            remove_paths.append(entry.path)
+                    else:
+                        print(f"✅ qualified file {entry.name}")
+                        remove_paths.append(entry.path)
+
+    print("-------------------------")
+    print("Active plot ids:")
+    print(active_plot_ids)
+
+    for u in remove_paths:
+        try:
+            os.unlink(u)
+            count_files = count_files + 1
+            print(f"Found and removed unrelated tmp {u}...")
+        except FileNotFoundError:
+            print(f"Failed to remove file {u}")
+            pass
+
+    print("-------------------------")
+    print(f"complete total {count_files} files removed")
