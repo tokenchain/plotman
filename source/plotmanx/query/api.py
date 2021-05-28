@@ -10,6 +10,8 @@ from tornado import web, ioloop, httpserver
 from .sql import SQLX
 from ..configuration import PlotmanConfig, get_dash_v1, get_dash_v1_static
 
+__author__ = 'lousvicton'
+
 try:
     import simplejson as json
 except ImportError:
@@ -26,6 +28,7 @@ class ApiBase(web.RequestHandler):
     SUPPORTED_METHODS = ["GET"]
 
     def initialize(self, *args, **kwargs):
+        self.version_plotman = pkg_resources.get_distribution('plotmanx').version
         self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
         self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
 
@@ -37,7 +40,7 @@ class ApiBase(web.RequestHandler):
         """Construct and send a JSON response with appropriate status code."""
         self.set_status(status)
         t = int(datetime.now().timestamp()),
-        response = {'result': 1, 'data': data, 'ts': t}
+        response = {'result': 1, 'data': data, 'ts': t, 'ver': self.version_plotman}
         self.write(json.dumps(response))
 
 
@@ -130,13 +133,13 @@ class ApiV1Review(ApiBase):
 
 class FrontEndLoad(web.RequestHandler):
     def initialize(self, *args, **kwargs):
+        self.ver = pkg_resources.get_distribution('plotmanx').version
         self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
         self.using_ssl = (self.request.headers.get('X-Scheme', 'http') == 'https')
 
     def get(self):
-        ver = pkg_resources.get_distribution('plotmanx').version
-        self.set_header("Content-Type", "text/plain")
-        self.render("index.html", messages=None, version=ver)
+        # self.set_header("Content-Type", "text/plain")
+        self.render("index.html", messages=None, version=self.ver)
 
 
 def start_master_api_node(cfg: PlotmanConfig):
@@ -148,10 +151,11 @@ def start_master_api_node(cfg: PlotmanConfig):
         settings = dict(
             debug=True,
             template_path=get_dash_v1(),
-            static_path=get_dash_v1_static()
+            static_path=get_dash_v1_static(),
         )
 
         appcli = web.Application([
+            (r"/(.*)", web.StaticFileHandler, dict(path=get_dash_v1())),
             (r"/report", NodeHandle),
             (r"/nodes", DashSimpleListNodes),
             (r"/apiv1", ApiV1Review),
