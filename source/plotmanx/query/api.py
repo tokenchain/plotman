@@ -9,6 +9,7 @@ import requests
 from tornado import web, ioloop, httpserver
 from tornado.template import Loader
 
+from .servefiles import DirectoryHandler
 from .sql import SQLX
 from ..configuration import PlotmanConfig, get_dash_v1,get_dash_v1_static
 
@@ -256,7 +257,7 @@ def start_master_api_node(cfg: PlotmanConfig):
             (r"/report", NodeHandle),
             (r"/api/v1/nodes", DashSimpleListNodes),
             (r"/api/v1", ApiV1Review),
-            (r"/monitors/(.*)", WebpHandler, static_handler_args)
+            (r"/monitors/(.*)", DirectoryHandler, static_handler_args)
         ], **settings)
 
         print(f"Serve nuxt path {get_dash_v1()} and set default entry point as index.html")
