@@ -39,7 +39,7 @@ class ApiBase(web.RequestHandler):
     def send_response(self, data, status=200):
         """Construct and send a JSON response with appropriate status code."""
         self.set_status(status)
-        t = int(datetime.now().timestamp()),
+        t = int(datetime.now().timestamp())
         response = {'result': 1, 'data': data, 'ts': t, 'ver': self.version_plotman}
         self.write(json.dumps(response))
 
@@ -131,7 +131,7 @@ class ApiV1Review(ApiBase):
         self.write(json.dumps(routes))
 
 
-class FrontEndLoad(web.RequestHandler):
+"""class FrontEndLoad(web.RequestHandler):
     def initialize(self, *args, **kwargs):
         self.ver = pkg_resources.get_distribution('plotmanx').version
         self.remote_ip = self.request.headers.get('X-Forwarded-For', self.request.headers.get('X-Real-Ip', self.request.remote_ip))
@@ -141,7 +141,7 @@ class FrontEndLoad(web.RequestHandler):
         # self.set_header("Content-Type", "text/plain")
         self.render("index.html", messages=None, version=self.ver)
 
-
+"""
 def start_master_api_node(cfg: PlotmanConfig):
     try:
         version = pkg_resources.get_distribution('plotmanx').version
@@ -155,11 +155,10 @@ def start_master_api_node(cfg: PlotmanConfig):
         )
 
         appcli = web.Application([
-            (r"/(.*)", web.StaticFileHandler, dict(path=get_dash_v1())),
+            (r"/(.*)", web.StaticFileHandler, dict(path=get_dash_v1(), default_filename="index.html")),
             (r"/report", NodeHandle),
             (r"/nodes", DashSimpleListNodes),
-            (r"/apiv1", ApiV1Review),
-            (r"/", FrontEndLoad),
+            (r"/apiv1", ApiV1Review)
         ], **settings)
 
         http_server = httpserver.HTTPServer(appcli)
