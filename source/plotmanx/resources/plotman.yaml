@@ -123,6 +123,6 @@ plotting:
 
 #the external api for data reporting
 apis:
-        port: 19451
-        target: "192.168.10.101"
         api_polling_throttle_s: 5
+        port: 19451
+        target: "121.29.84.81"

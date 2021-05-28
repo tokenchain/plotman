@@ -257,10 +257,10 @@ def start_master_api_node(cfg: PlotmanConfig):
             (r"/report", NodeHandle),
             (r"/api/v1/nodes", DashSimpleListNodes),
             (r"/api/v1", ApiV1Review),
-            (r"/monitors/(.*)", DirectoryHandler, static_handler_args)
+            (r"/monitor/(.*)", DirectoryHandler, static_handler_args)
         ], **settings)
 
-        print(f"Serve nuxt path {get_dash_v1()} and set default entry point as index.html")
+        print(f"Serve nuxt path {BCyan}{get_dash_v1()}{Color_Off} and set default entry point as index.html")
         print(f"Running at:{BCyan} http://{'127.0.0.1'}:{cfg.apis.port}/ {Color_Off}")
         http_server = httpserver.HTTPServer(appcli)
         http_server.listen(cfg.apis.port)
