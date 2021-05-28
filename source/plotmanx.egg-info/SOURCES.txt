@@ -88,6 +88,7 @@ source/plotmanx/analyze/pri.py
 source/plotmanx/analyze/report.py
 source/plotmanx/query/__init__.py
 source/plotmanx/query/api.py
+source/plotmanx/query/servefiles.py
 source/plotmanx/query/sql.py
 source/plotmanx/resources/__init__.py
 source/plotmanx/resources/plotman.yaml

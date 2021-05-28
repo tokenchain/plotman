@@ -142,6 +142,8 @@ class ApiV1Review(ApiBase):
         self.render("index.html", messages=None, version=self.ver)
 
 """
+
+
 def start_master_api_node(cfg: PlotmanConfig):
     try:
         version = pkg_resources.get_distribution('plotmanx').version
@@ -150,15 +152,16 @@ def start_master_api_node(cfg: PlotmanConfig):
 
         settings = dict(
             debug=True,
+            gzip=True,
             template_path=get_dash_v1(),
             static_path=get_dash_v1_static(),
         )
 
         appcli = web.Application([
-            (r"/(.*)", web.StaticFileHandler, dict(path=get_dash_v1(), default_filename="index.html")),
+            (r"monitor/(.*)", web.StaticFileHandler, dict(path=get_dash_v1(), default_filename="index.html")),
             (r"/report", NodeHandle),
             (r"/nodes", DashSimpleListNodes),
-            (r"/apiv1", ApiV1Review)
+            (r"/api/v1", ApiV1Review)
         ], **settings)
 
         http_server = httpserver.HTTPServer(appcli)
