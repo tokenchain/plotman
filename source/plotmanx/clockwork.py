@@ -3,6 +3,7 @@ import datetime
 import glob
 import operator
 import os
+import socket
 import subprocess
 
 import pendulum
@@ -10,12 +11,11 @@ import pkg_resources
 import psutil
 
 from .configuration import Scheduling, Directories, Plotting
-from .farmplot import FarmPlot
 from .job import Job, job_phases_for_tmpdir
 from .manager import phases_permit_new_job
 from .util import plot_util
 # Plotman libraries
-from .util.plot_util import getIP, isSpaceCritical
+from .util.plot_util import isSpaceCritical
 
 MIN = 60  # Seconds
 HR = 3600  # Seconds
@@ -54,6 +54,9 @@ class MintJ:
         self.net_bytes_read_last = 0
         self.net_bytes_write_last = 0
         self.iowait_last = 0
+        self.chia_version = plot_util.chia_version()
+        self.plotman_version = pkg_resources.get_distribution('plotmanx').version
+        self.host_machine = socket.gethostname()
 
     def Upcfg(self, schedule: Scheduling, plotting_cfg: Plotting):
         self.schedule_x = schedule
@@ -247,15 +250,14 @@ class MintJ:
                 else:
                     print('start plot > %s' % ts)
 
-    def GenStatus(self, jobs: list) -> dict:
+    def NeuoInfo(self, jobs: list, hdd: list, ioList: list) -> dict:
         count1 = len(glob.glob1("/mnt/local/tmp", "*.plot"))
         count2 = len(glob.glob1("/mnt/local/temp", "*.plot"))
         count3 = len(glob.glob1("/mnt/nvme/temp", "*.plot"))
         count4 = len(glob.glob1("/mnt/nvme1n0/temp", "*.plot"))
 
-        fcount = count1 + count2 + count3 + count4
-        listplmo = FarmPlot.get_running_moving_jobs()
-        nfslist = FarmPlot.get_nfs_details()
+        list_plmo = plot_util.discover_plmo_operations()
+        list_nfs = plot_util.discover_nfs_operations()
 
         disk = psutil.disk_io_counters()
         disk_bytes_read, disk_bytes_write = disk.read_bytes, disk.write_bytes
@@ -263,30 +265,32 @@ class MintJ:
         net_bytes_read, net_bytes_write = net.bytes_recv, net.bytes_sent
         iowait = psutil.cpu_times().iowait
 
-        disks = [d.mountpoint for d in psutil.disk_partitions()]
-        disks_usage = [psutil.disk_usage(d) for d in disks]
-        disks_used = sum(d.used for d in disks_usage)
-        disks_total = sum(d.total for d in disks_usage)
-
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
+
             historyplots=sum([i.exportProductionPlots for i in jobs]),
             sizet=sum([h.exportSize for h in jobs]),
-            plotcount=fcount,
-            io_read_issues=self.readIoIssue,
-            movingcount=len(listplmo),
-            movingdetail=listplmo,
-            nfsips=nfslist,
+
+            plotcount=sum([count1, count2, count3, count4]),
+            movingcount=len(list_plmo),
+            movingdetail=list_plmo,
+            nfsips=list_nfs,
             cpucount=psutil.cpu_count(),
-            stamp=int(datetime.datetime.now().timestamp()),
-            version=pkg_resources.get_distribution('plotmanx').version,
+
+            identity=self.host_machine,
+            version=self.plotman_version,
+            chia_ver=self.chia_version,
+
+            disk_info=hdd,
+            disk_nvme_io=ioList,
+            io_read_issues=self.readIoIssue,
 
             cpu_percent=psutil.cpu_percent(),
             memory_percent=psutil.virtual_memory().percent,
-            cache_percent=round(psutil.virtual_memory().cached / psutil.virtual_memory().total * 100, 1),
-            slab_percent=round(psutil.virtual_memory().slab / psutil.virtual_memory().total * 100, 1),
+            # cache_percent=round(psutil.virtual_memory().cached / psutil.virtual_memory().total * 100, 1),
+            # slab_percent=round(psutil.virtual_memory().slab / psutil.virtual_memory().total * 100, 1),
             swap_percent=psutil.swap_memory().percent,
-            disk_percent=round((disks_used / disks_total * 100), 2),
+
             iowait_percent=round((iowait - self.iowait_last) / psutil.cpu_count() * 100, 1),
             net_read_mb_s='{:,}'.format(int((net_bytes_read - self.net_bytes_read_last) / 1024 / 1024)),
             net_write_mb_s='{:,}'.format(int((net_bytes_write - self.net_bytes_write_last) / 1024 / 1024)),
@@ -294,7 +298,7 @@ class MintJ:
             disk_write_mb_s='{:,}'.format(int((disk_bytes_write - self.disk_bytes_write_last) / 1024 / 1024)),
             # lsof='{:,}'.format(int(subprocess.check_output('lsof | wc -l', shell=True).decode())),
             net_fds='{:,}'.format(len(psutil.net_connections())),
-            identity=getIP(),
+
         )
 
         self.net_bytes_read_last, self.net_bytes_write_last = net_bytes_read, net_bytes_write
