@@ -197,7 +197,7 @@ def countnonoverlappingrematches(pattern, thestring):
 def chia_version() -> str:
     plot_args = ['chia', 'version']
     try:
-        version = os.popen(" ".join(plot_args), 'r').read()
+        version = os.popen(" ".join(plot_args), 'r').read().rstrip("\n")
     except TypeError:
         version = 'undetected'
     except ValueError:
@@ -207,7 +207,7 @@ def chia_version() -> str:
 
 
 def plotman_version() -> str:
-    return pkg_resources.get_distribution('plotmanx')
+    return pkg_resources.get_distribution('plotmanx').version
 
 
 def get_plot_progress(line_count: int) -> float:

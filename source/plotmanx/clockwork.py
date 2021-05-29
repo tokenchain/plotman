@@ -7,7 +7,6 @@ import socket
 import subprocess
 
 import pendulum
-import pkg_resources
 import psutil
 
 from .configuration import Scheduling, Directories, Plotting
@@ -269,8 +268,12 @@ class MintJ:
         net_bytes_read, net_bytes_write = net.bytes_recv, net.bytes_sent
         iowait = psutil.cpu_times().iowait
 
-        #print(list_plmo)
-        #print(list_nfs)
+        readgbs = float(net_bytes_read - self.net_bytes_read_last) / plot_util.GB
+        writegbs = float(net_bytes_write - self.net_bytes_write_last) / plot_util.GB
+        diskreadgbs = float(disk_bytes_read - self.disk_bytes_read_last) / plot_util.GB
+        diskwritegbs = float(disk_bytes_write - self.disk_bytes_write_last) / plot_util.GB
+        # print(list_plmo)
+        # print(list_nfs)
 
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
@@ -299,12 +302,12 @@ class MintJ:
             swap_percent=psutil.swap_memory().percent,
 
             iowait_percent=round((iowait - self.iowait_last) / psutil.cpu_count() * 100, 1),
-            net_read_mb_s='{:,}'.format(int((net_bytes_read - self.net_bytes_read_last) / 1024 / 1024)),
-            net_write_mb_s='{:,}'.format(int((net_bytes_write - self.net_bytes_write_last) / 1024 / 1024)),
-            disk_read_mb_s='{:,}'.format(int((disk_bytes_read - self.disk_bytes_read_last) / 1024 / 1024)),
-            disk_write_mb_s='{:,}'.format(int((disk_bytes_write - self.disk_bytes_write_last) / 1024 / 1024)),
-            # lsof='{:,}'.format(int(subprocess.check_output('lsof | wc -l', shell=True).decode())),
-            # net_fds='{:,}'.format(len(psutil.net_connections())),
+            net_read_mb_s=readgbs,
+            net_write_mb_s=writegbs,
+            disk_read_mb_s=diskreadgbs,
+            disk_write_mb_s=diskwritegbs,
+            lsof=int(subprocess.check_output('lsof | wc -l', shell=True).decode()),
+            net_fds=len(psutil.net_connections()),
 
         )
 

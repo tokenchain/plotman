@@ -49,10 +49,10 @@ class SQLX:
                                    
                                    memory_percent REAL NOT NULL,
                                                                       
-                                   net_read_mb_s INTEGER NOT NULL,
-                                   net_write_mb_s INTEGER NOT NULL,
-                                   disk_read_mb_s INTEGER NOT NULL,
-                                   disk_write_mb_s INTEGER NOT NULL,
+                                   net_read_gb_s REAL NOT NULL,
+                                   net_write_gb_s REAL NOT NULL,
+                                   disk_read_gb_s REAL NOT NULL,
+                                   disk_write_gb_s REAL NOT NULL,
 
                                    net_fds INTEGER NOT NULL,
                                    version text NOT NULL,
@@ -142,7 +142,7 @@ class SQLX:
 
                 disk_percent_block,io_nvme_block,io_list_plmo,io_list_nfs,io_read_issues,
 
-                memory_percent,net_read_mb_s,net_write_mb_s,disk_read_mb_s,disk_write_mb_s,
+                memory_percent,net_read_gb_s,net_write_gb_s,disk_read_gb_s,disk_write_gb_s,
 
                 net_fds,
 
@@ -168,10 +168,10 @@ class SQLX:
 
                 {float(j['io_read_issues'])},
                 {float(j['memory_percent'])},
-                {commaInt(j['net_read_mb_s'])},
-                {commaInt(j['net_write_mb_s'])},
-                {commaInt(j['disk_read_mb_s'])},
-                {commaInt(j['disk_write_mb_s'])},
+                {float(j['net_read_mb_s'])},
+                {float(j['net_write_mb_s'])},
+                {float(j['disk_read_mb_s'])},
+                {float(j['disk_write_mb_s'])},
                 {commaInt(j['net_fds'])},
                 '{txtBlock(j['version'])}',
                 '{txtBlock(j['chia_ver'])}',
