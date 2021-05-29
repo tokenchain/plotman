@@ -25,7 +25,6 @@ except ImportError:
 def PostDat(dp: dict, cfg: PlotmanConfig):
     # sending post request and saving response as response object
     try:
-        print(dp)
         payload = json.dumps(dp)
         requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
     except TypeError as v:
