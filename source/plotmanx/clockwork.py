@@ -269,8 +269,8 @@ class MintJ:
         net_bytes_read, net_bytes_write = net.bytes_recv, net.bytes_sent
         iowait = psutil.cpu_times().iowait
 
-        print(list_plmo)
-        print(list_nfs)
+        #print(list_plmo)
+        #print(list_nfs)
 
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
