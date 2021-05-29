@@ -27,7 +27,7 @@ def APILib_data_link(dp: dict, cfg: PlotmanConfig):
     try:
         payload = json.dumps(dp)
         requests.post(
-            url=f'http://{cfg.apis.target}:{cfg.apis.port}/report',
+            url=f'http://{cfg.apis.target}:{cfg.apis.port}/api/v1/report',
             data=payload,
             timeout=5.0
         )
