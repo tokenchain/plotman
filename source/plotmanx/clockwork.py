@@ -269,6 +269,9 @@ class MintJ:
         net_bytes_read, net_bytes_write = net.bytes_recv, net.bytes_sent
         iowait = psutil.cpu_times().iowait
 
+        print(list_plmo)
+        print(list_nfs)
+
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
 
@@ -301,7 +304,7 @@ class MintJ:
             disk_read_mb_s='{:,}'.format(int((disk_bytes_read - self.disk_bytes_read_last) / 1024 / 1024)),
             disk_write_mb_s='{:,}'.format(int((disk_bytes_write - self.disk_bytes_write_last) / 1024 / 1024)),
             # lsof='{:,}'.format(int(subprocess.check_output('lsof | wc -l', shell=True).decode())),
-            net_fds='{:,}'.format(len(psutil.net_connections())),
+            # net_fds='{:,}'.format(len(psutil.net_connections())),
 
         )
 
