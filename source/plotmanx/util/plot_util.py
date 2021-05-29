@@ -86,7 +86,7 @@ def isSpaceCritical(tmpdir: str) -> bool:
     """
 
     gb_free = df_b(tmpdir) / GB
-    if gb_free < 0.1:
+    if gb_free < 1:
         return True
     else:
         return False
@@ -344,6 +344,8 @@ def discover_nvme_io() -> list:
 
     except OSError as e:
         print(u'Caught exception when crawling disk I/O counters: {0}'.format(e))
+    except TypeError as v:
+        print("there is an type error.")
 
     return devices
 
@@ -379,14 +381,17 @@ def discover_plmo_operations():
 
 def discover_nfs_operations() -> list:
     nfs_list = []
+    try:
+        for proc in psutil.process_iter(['pid', 'cmdline']):
+            # Ignore processes which most likely have terminated between the time of iteration and data access.
+            with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
+                if is_plot_moving(proc.cmdline()):
+                    if is_plmo_nfs(proc.cmdline()):
+                        test = " ".join(proc.cmdline())
+                        print(f"check path: {test}")
+                        g = re.match('(\d+)', test)
+                        nfs_list.append(g[0])
 
-    for proc in psutil.process_iter(['pid', 'cmdline']):
-        # Ignore processes which most likely have terminated between the time of iteration and data access.
-        with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied):
-            if is_plot_moving(proc.cmdline()):
-                if is_plmo_nfs(proc.cmdline()):
-                    test = " ".join(proc.cmdline())
-                    g = re.match('(\d+)', test)
-                    nfs_list.append(g[0])
-
+    except TypeError as b:
+        print(f"Type Error: {b}")
     return nfs_list
