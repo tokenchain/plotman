@@ -321,7 +321,7 @@ def discover_local_hhd() -> list:
                 print("psutil=%s, df=%s" % (usage.used, used))
 
             lowCap = False
-            if usage.free < 108 * GB:
+            if usage.free < 100 * GB:
                 lowCap = True
 
             devices.append(dict(disk=dev, per=percent, low=lowCap))
@@ -333,14 +333,14 @@ def discover_nvme_io() -> list:
     devices = []
     try:
         disk_counters = psutil.disk_io_counters(perdisk=True)
-        print(disk_counters)
+        # print(disk_counters)
         for device_name in disk_counters:
             m0 = re.match("^nvme(.*)$", device_name)
             if m0:
                 counters = disk_counters[device_name]
-                mbpersec = counters.write_bytes / 1024 / 1024
-                print(f'Disk I/O counters - {device_name}: {mbpersec} mb/s')
-                devices.append(dict(dev=device_name, speed=mbpersec))
+                gbpersec = float(counters.write_bytes) / GB
+                print(f'Disk I/O counters device - {device_name}: {gbpersec} gb/s')
+                devices.append(dict(dev=device_name, speed=gbpersec))
 
     except OSError as e:
         print(u'Caught exception when crawling disk I/O counters: {0}'.format(e))
@@ -390,7 +390,7 @@ def discover_nfs_operations() -> list:
                         test = " ".join(proc.cmdline())
                         print(f"check path: {test}")
                         g = re.match('(\d+)', test)
-                        nfs_list.append(g[0])
+                        nfs_list.append(f"192.168.10.{g[0]}")
 
     except TypeError as b:
         print(f"Type Error: {b}")

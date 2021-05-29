@@ -24,8 +24,11 @@ except ImportError:
 
 def PostDat(dp: dict, cfg: PlotmanConfig):
     # sending post request and saving response as response object
-    payload = json.dumps(dp)
-    requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
+    try:
+        payload = json.dumps(dp)
+        requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
+    except TypeError as v:
+        print(f"error from making json object {v}")
 
 
 class ApiBase(web.RequestHandler):
