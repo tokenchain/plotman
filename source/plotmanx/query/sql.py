@@ -166,7 +166,7 @@ class SQLX:
                 {txtBlock(j['movingdetail'])},
                 {txtBlock(j['nfsips'])},
 
-                {float(j['io_read_issues'])},
+                {int(j['io_read_issues'])},
                 {float(j['memory_percent'])},
                 {float(j['net_read_mb_s'])},
                 {float(j['net_write_mb_s'])},
