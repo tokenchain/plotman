@@ -13,7 +13,7 @@ from .clockwork import MintJ
 from .configuration import PlotmanConfig
 from .farmplot import FarmPlot
 from .job import Job
-from .query.api import start_master_api_node, PostDat
+from .query.api import start_master_api_node, APILib_data_link
 from .util import plot_util
 from .util.yamlgen import YamlGen
 
@@ -109,7 +109,7 @@ def plotting(cfg: PlotmanConfig):
                 minp.ParallelWorker()
 
             if cfg.apis.target is not "":
-                PostDat(minp.NeuoInfo(
+                APILib_data_link(minp.NeuoInfo(
                     minp.LsJobs,
                     plot_util.discover_local_hhd(),
                     plot_util.discover_nvme_io()

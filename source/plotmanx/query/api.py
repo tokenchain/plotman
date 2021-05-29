@@ -22,13 +22,21 @@ except ImportError:
     import json
 
 
-def PostDat(dp: dict, cfg: PlotmanConfig):
+def APILib_data_link(dp: dict, cfg: PlotmanConfig):
     # sending post request and saving response as response object
     try:
         payload = json.dumps(dp)
-        requests.post(url=f'http://{cfg.apis.target}:{cfg.apis.port}/report', data=payload)
-    except TypeError as v:
-        print(f"error from making json object {v}")
+        requests.post(
+            url=f'http://{cfg.apis.target}:{cfg.apis.port}/report',
+            data=payload,
+            timeout=5.0
+        )
+    except requests.Timeout as v:
+        print(f"time out from{v}")
+    except requests.ConnectionError as v:
+        print(f"max connection error: {v}")
+    except requests.HTTPError as v:
+        print(f"max http unknown error: {v}")
 
 
 class ApiBase(web.RequestHandler):

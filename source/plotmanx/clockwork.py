@@ -272,8 +272,6 @@ class MintJ:
         writegbs = float(net_bytes_write - self.net_bytes_write_last) / plot_util.GB
         diskreadgbs = float(disk_bytes_read - self.disk_bytes_read_last) / plot_util.GB
         diskwritegbs = float(disk_bytes_write - self.disk_bytes_write_last) / plot_util.GB
-        # print(list_plmo)
-        # print(list_nfs)
 
         d_info = dict(
             jobls=[i.toJson() for i in jobs],
