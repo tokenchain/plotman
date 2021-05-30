@@ -6,6 +6,25 @@ from datetime import datetime
 from ..util.plot_util import parse_chia_plot_time, get_plot_progress
 
 
+def errorLineStatus(line: str) -> (bool, bool):
+    disk_space = False
+    read_failure = False
+    m = re.match(r'^Only wrote (\d+) of (\d+) bytes at offset (\d+) from (.+)', line)
+    if m:
+        disk_space = True
+
+    m = re.match(r'^Only read (\d+) of (\d+) bytes at offset (\d+) from (.+)', line)
+    if m:
+        read_failure = True
+
+    return disk_space, read_failure
+
+
+def errorLine(line: str) -> bool:
+    disk_space, read_failure = errorLineStatus(line)
+    return disk_space or read_failure
+
+
 class LogFile:
     """
     basic checking and analyzer for this log file
@@ -22,6 +41,7 @@ class LogFile:
         self._phase = (0, 0)
         self._phase_time = dict()
         self._progress = 0
+        self._err_lines = 0
         self._io_failure = False
         self._disk_tight = False
 
@@ -51,11 +71,24 @@ class LogFile:
 
     @property
     def getProgressPercentage(self) -> float:
-        return self._progress * 100
+        return self._progress
 
     @property
     def completedJobs(self):
         return self._produced
+
+    def count_lines(self, adjust: int = 0) -> int:
+        with open(self.path, 'r') as v:
+            filedat = v.read()
+            lin_count = int(filedat.count('\n') + 1)
+        c = lin_count - adjust
+        return c
+
+    def read_last_line(self) -> str:
+        last_line = ''
+        with open(self.path, 'r') as f:
+            last_line = f.readlines()[-1]
+        return last_line
 
     # Initialize data that needs to be loaded from the logfile
     def init_logfile(self):
@@ -73,14 +106,15 @@ class LogFile:
         plots = 0
         line_z = 0
         line_zz = 0
+        line_err = 0
 
-        for attempt_number in range(1):
+        for attempt_number in range(3):
             plots = 0
             line_z = 0
             with open(self.path, 'r') as f:
 
                 for line in f:
-                    line_z = line_z + 1
+                    line_z += 1
                     m = re.match('^ID: ([0-9a-f]*)', line)
                     if m:
                         self._current_plot_id = m.group(1)
@@ -94,27 +128,31 @@ class LogFile:
                         # continue and looking for the last
 
                     m = re.match(r'^Renamed final file from', line)
+
                     if m:
                         plots += 1
                         line_zz = line_z
+                        line_err = 0
 
-                filedat = f.read()
-                lin_count = (filedat.count('\n') + 1 - line_zz)
+                    if errorLine(line):
+                        line_err += 1
 
             if found_id and found_log:
                 break  # Stop trying
             else:
+                print("try to look for the log file again.")
                 time.sleep(1)  # Sleep and try again
-
-        # If we couldn't find the line in the logfile, the job is probably just getting started
-        # (and being slow about it).  In this case, use the last metadata change as the start time.
-        # TODO: we never come back to this; e.g. plot_id may remain uninitialized.
-        # TODO: should we just use the process start time instead?
 
         if not found_log:
             self._start_time = datetime.fromtimestamp(os.path.getctime(self.path))
         self._produced = plots
-        self._progress = get_plot_progress(lin_count)
+        self._err_lines = line_err
+        total_lines = self.count_lines()
+
+        print(f"error lines from the last plotting {self._err_lines}, full lines {total_lines}")
+
+        self._progress = get_plot_progress(self.count_lines(line_err + line_zz))
+
         # Load things from logfile that are dynamic
         self.updatePhases()
         # self.updateGeneratePlots()
@@ -133,14 +171,14 @@ class LogFile:
         plotpool = 0
         line_z = 0
         line_zz = 0
+        line_err = 0
 
         disk_space = False
         read_failure = False
-        with open(self.path, 'r') as f:
 
+        with open(self.path, 'r') as f:
             for line in f:
                 line_z = line_z + 1
-
                 m = re.match('^ID: ([0-9a-f]*)', line)
                 if m:
                     self._current_plot_id = m.group(1)
@@ -187,23 +225,18 @@ class LogFile:
                     phase_subphases = {}
                     plots += 1
                     line_zz = line_z
+                    line_err = 0
 
-            lines = f.readlines()
-            lastlns = lines[-1:]
+                if errorLine(line):
+                    line_err += 1
 
-            filedat = f.read()
-            lin_count = (filedat.count('\n') + 1 - line_zz)
+        a, b = errorLineStatus(self.read_last_line())
+        if a:
+            self._disk_tight = True
+        if b:
+            self._io_failure = True
 
-            if len(lastlns) > 0:
-                m = re.match(r'^Only wrote', lastlns[0])
-                if m:
-                    disk_space = True
-
-                m = re.match(r'^Only read (\d+) of (\d+) bytes at offset (\d+) from (.+)', lastlns[0])
-                if m:
-                    read_failure = True
-
-        self._progress = get_plot_progress(lin_count)
+        self._progress = get_plot_progress(self.count_lines(line_err + line_zz))
 
         if phase_subphases:
             phase = max(phase_subphases.keys())
@@ -215,9 +248,6 @@ class LogFile:
 
         if plotpool > 0:
             self._total_T = plotpool / 1000
-
-        self._disk_tight = disk_space
-        self._io_failure = read_failure
 
     @property
     def disk_confirm(self):

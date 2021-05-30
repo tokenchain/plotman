@@ -6,7 +6,6 @@ from datetime import datetime
 import psutil
 
 from .analyze.pri import LogFile
-from .util import plot_util
 
 
 def job_phases_for_tmpdir(d, all_jobs) -> list:

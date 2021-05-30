@@ -47,8 +47,10 @@ source/_lab/__init__.py
 source/_lab/test_d2.py
 source/_lab/test_d3.py
 source/_lab/test_d4.py
+source/_lab/test_d5.py
 source/_lab/test_data
 source/_lab/test_disk.py
+source/_lab/test_read_data.py
 source/_lab/test_web.py
 source/export/csv.py
 source/export/parser.py
