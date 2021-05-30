@@ -181,8 +181,11 @@ def column_wrap(items, n_cols, filler=None) -> list:
     return rows
 
 
-def is_freezed(job) -> str:
-    return 'YES' if job.last_updated_time_in_min > 60 else 'NO'
+def get_frw_status(job) -> str:
+    f = "Y" if job.isFrozen else "N"
+    r = "Y" if job.isReadFail else "N"
+    w = "Y" if job.isWroteErr else "N"
+    return f"{f}/{r}/{w}"
 
 
 def parse_chia_plot_time(s):
