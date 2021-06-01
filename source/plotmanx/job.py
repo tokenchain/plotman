@@ -312,9 +312,9 @@ class Job:
             tmp2=self.tmp2dir,
             dst=self.dstdir,
             logfile=self.getLogPath,
-            freeze=('YES' if self.isFrozen else 'NO'),
-            readerr=('YES' if self.isReadFail else 'NO'),
-            wroteerr=('YES' if self.isWroteErr else 'NO'),
+            freeze='YES' if self.isFrozen else 'NO',
+            readerr='YES' if self.isReadFail else 'NO',
+            wroteerr='YES' if self.isWroteErr else 'NO',
             progress=self.zLogFile.getProgressPercentage,
             phase=self.progressDisplay
         )
