@@ -1,4 +1,5 @@
 import itertools
+import json
 import sqlite3
 from datetime import datetime
 
@@ -10,6 +11,10 @@ def txtBlock(s: any) -> str:
         return str(s)
     else:
         return ""
+
+def txtJson(s: any)->str:
+    return json.dumps(s)
+
 
 
 def commaInt(x: str) -> int:
@@ -139,7 +144,7 @@ class SQLX:
             print("body is not empty")
 
         try:
-            
+
             print(j)
             content_insert = f"""
             INSERT INTO nodeInfo (
@@ -165,10 +170,10 @@ class SQLX:
                 {float(j['historyplots'])},
                 {float(j['swap_percent'])},
 
-                '{txtBlock(j['disk_info'])}',
-                '{txtBlock(j['disk_nvme_io'])}',
-                '{txtBlock(j['movingdetail'])}',
-                '{txtBlock(j['nfsips'])}',
+                '{txtJson(j['disk_info'])}',
+                '{txtJson(j['disk_nvme_io'])}',
+                '{txtJson(j['movingdetail'])}',
+                '{txtJson(j['nfsips'])}',
                 {int(j['io_read_issues'])},
 
                 {float(j['memory_percent'])},
