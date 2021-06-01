@@ -157,7 +157,7 @@ class SQLX:
 
                 version,chia_ver,
 
-                timen
+                net_fds,timen
 
             ) VALUES(
 
@@ -184,6 +184,7 @@ class SQLX:
                 
                 '{txtBlock(j['version'])}',
                 '{txtBlock(j['chia_ver'])}',
+                0,
                 {int(datetime.now().timestamp())}
             )
             """
