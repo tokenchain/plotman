@@ -199,7 +199,7 @@ class SQLX:
 
     def getNodes(self) -> list:
         block = """
-        SELECT * FROM nodeInfo GROUP BY host ORDER BY timen DESC
+        SELECT * FROM nodeInfo ORDER BY timen DESC GROUP BY host
         """
 
         listd = self.cur.execute(block).fetchall()
