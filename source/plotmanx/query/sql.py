@@ -204,7 +204,7 @@ class SQLX:
 
         """
         block = """
-        SELECT * info FROM (SELECT * FROM nodeInfo ORDER BY timen DESC) as tb_temp GROUP BY host;
+        SELECT * FROM (SELECT * FROM nodeInfo ORDER BY timen DESC) as tb_temp GROUP BY host;
         """
 
         listd = self.cur.execute(block).fetchall()
