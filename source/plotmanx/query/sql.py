@@ -139,6 +139,8 @@ class SQLX:
             print("body is not empty")
 
         try:
+            
+            print(j)
             content_insert = f"""
             INSERT INTO nodeInfo (
 
@@ -147,8 +149,6 @@ class SQLX:
                 disk_percent_block,io_nvme_block,io_list_plmo,io_list_nfs,io_read_issues,
 
                 memory_percent,net_read_gb_s,net_write_gb_s,disk_read_gb_s,disk_write_gb_s,
-
-                net_fds,
 
                 version,chia_ver,
 
@@ -176,7 +176,7 @@ class SQLX:
                 {float(j['net_write_mb_s'])},
                 {float(j['disk_read_mb_s'])},
                 {float(j['disk_write_mb_s'])},
-                0,
+                
                 '{txtBlock(j['version'])}',
                 '{txtBlock(j['chia_ver'])}',
                 {int(datetime.now().timestamp())}
