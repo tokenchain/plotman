@@ -123,7 +123,10 @@ class SQLX:
 
                             SET time={ts},
                             progress={float(h['progress'])},
-                            phase='{txtBlock(h['phase'])}'
+                            phase='{txtBlock(h['phase'])}',
+                            freeze='{txtBlock(h['freeze'])}',
+                            readerr='{txtBlock(h['readerr'])}',
+                            wroteerr='{txtBlock(h['wroteerr'])}'
 
                         WHERE plotid='{plot_id}'
                         ;
@@ -131,7 +134,7 @@ class SQLX:
                         self.cur.execute(content_update)
 
             except sqlite3.OperationalError as r:
-                print(f"there is a things that doesnt work. {r}")
+                print(f"there is a things that doesnt work on - job. {r}")
         else:
             print("body is not empty")
 
@@ -139,9 +142,7 @@ class SQLX:
             content_insert = f"""
             INSERT INTO nodeInfo (
 
-                host,tmp_plots,mv_channels,cpu_count,cpu_percent,bucket_sum_t,bucket_count,
-
-                swap_percent,
+                host,tmp_plots,mv_channels,cpu_count,cpu_percent,bucket_sum_t,bucket_count,swap_percent,
 
                 disk_percent_block,io_nvme_block,io_list_plmo,io_list_nfs,io_read_issues,
 
@@ -168,14 +169,14 @@ class SQLX:
                 {txtBlock(j['disk_nvme_io'])},
                 {txtBlock(j['movingdetail'])},
                 {txtBlock(j['nfsips'])},
-
                 {int(j['io_read_issues'])},
+
                 {float(j['memory_percent'])},
                 {float(j['net_read_mb_s'])},
                 {float(j['net_write_mb_s'])},
                 {float(j['disk_read_mb_s'])},
                 {float(j['disk_write_mb_s'])},
-                {j['net_fds']},
+                {0},
                 '{txtBlock(j['version'])}',
                 '{txtBlock(j['chia_ver'])}',
                 {int(datetime.now().timestamp())}
@@ -185,7 +186,7 @@ class SQLX:
             self.cur.execute(content_insert)
 
         except sqlite3.OperationalError as r:
-            print(f"there is a things that doesnt work. {r}")
+            print(f"there is a things that doesnt work - machine. {r}")
 
         return host
 
