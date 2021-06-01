@@ -16,7 +16,6 @@ DEBUG = options.debug"""
 
 ROUTE_TO_INDEX = True
 
-
 class DirectoryHandler(tornado.web.StaticFileHandler):
     def validate_absolute_path(self, root, absolute_path):
         if ROUTE_TO_INDEX and self.request.uri != '/' and not '.' in self.request.uri:

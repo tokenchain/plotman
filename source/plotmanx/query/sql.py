@@ -1,4 +1,3 @@
-import itertools
 import json
 import sqlite3
 from datetime import datetime
@@ -12,9 +11,9 @@ def txtBlock(s: any) -> str:
     else:
         return ""
 
-def txtJson(s: any)->str:
-    return json.dumps(s)
 
+def txtJson(s: any) -> str:
+    return json.dumps(s)
 
 
 def commaInt(x: str) -> int:
@@ -84,9 +83,11 @@ class SQLX:
                            wroteerr text NOT NULL,
                            time INTEGER NOT NULL
                    );''')
+
     """
     host name as return
     """
+
     def datainput(self, j: dict, ts: int) -> str:
         host = txtBlock(j['identity'])
         if len(j['jobls']) > 0:
@@ -99,6 +100,7 @@ class SQLX:
                     content_find = f"""
 
                     SELECT COUNT(*) FROM plotv2 WHERE plotid='{plot_id}';
+
                     """
 
                     (n,) = self.cur.execute(content_find).fetchone()
@@ -205,7 +207,5 @@ class SQLX:
         """for company, orders_iter in itertools.groupby(listd, key=lambda r: r[0]):
             orders = list(orders_iter)
             total_qty = sum(order[2] for order in orders)"""
-
-
 
         return listd
