@@ -165,10 +165,10 @@ class SQLX:
                 {float(j['historyplots'])},
                 {float(j['swap_percent'])},
 
-                {txtBlock(j['disk_info'])},
-                {txtBlock(j['disk_nvme_io'])},
-                {txtBlock(j['movingdetail'])},
-                {txtBlock(j['nfsips'])},
+                '{txtBlock(j['disk_info'])}',
+                '{txtBlock(j['disk_nvme_io'])}',
+                '{txtBlock(j['movingdetail'])}',
+                '{txtBlock(j['nfsips'])}',
                 {int(j['io_read_issues'])},
 
                 {float(j['memory_percent'])},
@@ -176,7 +176,7 @@ class SQLX:
                 {float(j['net_write_mb_s'])},
                 {float(j['disk_read_mb_s'])},
                 {float(j['disk_write_mb_s'])},
-                {0},
+                0,
                 '{txtBlock(j['version'])}',
                 '{txtBlock(j['chia_ver'])}',
                 {int(datetime.now().timestamp())}
