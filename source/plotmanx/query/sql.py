@@ -107,7 +107,7 @@ class SQLX:
                             host, time)
                             VALUES (
                             '{plot_id}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, 
-                            {float(h['progress'])}, '{txtBlock(h['phase'])}'
+                            {float(h['progress'])}, '{txtBlock(h['phase'])}',
                             '{txtBlock(h['freeze'])}','{txtBlock(h['readerr'])}','{txtBlock(h['wroteerr'])}',
                             '{host}', {ts}
                             )
