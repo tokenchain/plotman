@@ -78,16 +78,18 @@ class NodeHandle(web.RequestHandler):
             print("error from decoding json file.")
             return
 
-        # tstime = datetime.now().strftime('%m-%d %H:%M:%S')
+        g = datetime.now().strftime('%m-%d %H:%M:%S')
         tstime = datetime.now().timestamp()
 
         if req_body is not None:
-            sq.datainput(jpayload, tstime)
+            host = sq.datainput(jpayload, tstime)
+
+            print("Report data -")
+            print(f"{g} | {host} | {jpayload['version']}")
 
         sq.end()
 
-        print("Report data ------")
-        print(f"remote ip: and ver. {jpayload['version']}")
+
 
 
 class DashSimpleListNodes(ApiBase):

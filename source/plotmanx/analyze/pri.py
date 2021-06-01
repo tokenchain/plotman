@@ -149,7 +149,8 @@ class LogFile:
         self._err_lines = line_err
         total_lines = self.count_lines()
 
-        print(f"error lines from the last plotting {self._err_lines}, full lines {total_lines}")
+        if line_err > 0:
+            print(f"found error lines {self._err_lines}, full lines {total_lines}, ID: {self._current_plot_id}")
 
         self._progress = get_plot_progress(self.count_lines(line_err + line_zz))
 

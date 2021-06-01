@@ -79,9 +79,11 @@ class SQLX:
                            wroteerr text NOT NULL,
                            time INTEGER NOT NULL
                    );''')
-
-    def datainput(self, j: dict, ts: int) -> None:
-
+    """
+    host name as return
+    """
+    def datainput(self, j: dict, ts: int) -> str:
+        host = txtBlock(j['identity'])
         if len(j['jobls']) > 0:
 
             try:
@@ -107,7 +109,7 @@ class SQLX:
                             '{plot_id}', {int(h['k'])}, {int(h['r'])}, {int(h['b'])}, {int(h['u'])}, {int(h['pid'])}, 
                             {float(h['progress'])}, '{txtBlock(h['phase'])}'
                             '{txtBlock(h['freeze'])}','{txtBlock(h['readerr'])}','{txtBlock(h['wroteerr'])}',
-                            '{txtBlock(j['identity'])}', {ts}
+                            '{host}', {ts}
                             )
                            ;
                         """
@@ -153,7 +155,7 @@ class SQLX:
 
             ) VALUES(
 
-                '{txtBlock(j['identity'])}',
+                '{host}',
                 {int(j['plotcount'])},
                 {int(j['movingcount'])},
                 {int(j['cpucount'])},
@@ -184,6 +186,8 @@ class SQLX:
 
         except sqlite3.OperationalError as r:
             print(f"there is a things that doesnt work. {r}")
+
+        return host
 
     def getNodes(self) -> list:
         block = """
