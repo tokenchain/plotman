@@ -1,3 +1,4 @@
+import itertools
 import sqlite3
 from datetime import datetime
 
@@ -186,9 +187,15 @@ class SQLX:
 
     def getNodes(self) -> list:
         block = """
-        SELECT * FROM nodeInfo ORDER BY timen DESC GROUP BY host 
+        SELECT * FROM nodeInfo GROUP BY host ORDER BY timen DESC
         """
 
-        list = self.cur.execute(block).fetchall()
+        listd = self.cur.execute(block).fetchall()
 
-        return list
+        """for company, orders_iter in itertools.groupby(listd, key=lambda r: r[0]):
+            orders = list(orders_iter)
+            total_qty = sum(order[2] for order in orders)"""
+
+
+
+        return listd

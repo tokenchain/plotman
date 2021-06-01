@@ -243,7 +243,6 @@ def get_plot_progress(line_count: int) -> float:
     else:
         progress += phase4_weight * ((line_count - phase3_line_end) / (phase4_line_end - phase3_line_end))
 
-
     return progress
 
 
