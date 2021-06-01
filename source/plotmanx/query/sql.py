@@ -145,7 +145,6 @@ class SQLX:
 
         try:
 
-            print(j)
             content_insert = f"""
             INSERT INTO nodeInfo (
 
