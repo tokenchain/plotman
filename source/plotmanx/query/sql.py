@@ -173,7 +173,7 @@ class SQLX:
                 {float(j['net_write_mb_s'])},
                 {float(j['disk_read_mb_s'])},
                 {float(j['disk_write_mb_s'])},
-                {commaInt(j['net_fds'])},
+                {j['net_fds']},
                 '{txtBlock(j['version'])}',
                 '{txtBlock(j['chia_ver'])}',
                 {int(datetime.now().timestamp())}
