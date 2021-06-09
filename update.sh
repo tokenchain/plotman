@@ -1,7 +1,7 @@
 #!/bin/sh
 . ./n.sh
 
-clean_repo
+#py_publish
 #fined
 #instruction
 

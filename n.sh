@@ -55,7 +55,7 @@ fined() {
   #sudo pip3 install --proxy 127.0.0.1:1087 tronpytool==$VERSION
 }
 
-clean_repo() {
+py_publish() {
   VERSION=$(cat VERSION)
   increment_version $VERSION >version
   VERSION=$(cat VERSION)

@@ -6,7 +6,7 @@ build(){
 build_b(){
   env GOOS=darwin GOARCH=amd64 go build -o plmo bin.go
 }
-run(){
+runcyberpunk2(){
   ./plmo $FROM $TO 90000000 cyberpunk2.log
 }
 unlock(){
