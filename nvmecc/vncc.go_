@@ -60,6 +60,7 @@ func ccoyc(src, dst string, BUFFERSIZE int64) error {
 	total := ff.Size()
 	buf := make([]byte, BUFFERSIZE)
 	buffin := 0
+	buff2:=0
 	for {
 		n, err := source.Read(buf)
 		if err != nil && err != io.EOF {
@@ -77,12 +78,16 @@ func ccoyc(src, dst string, BUFFERSIZE int64) error {
 			return err
 		}
 
-		if time.Now().Unix()-markTime > 60 {
+		if time.Now().Unix()-markTime > 30 {
 			markTime = time.Now().Unix()
-			buffin = buffin + bn
+			buffin = buffin + buff2
+			speed := buff2 / 30 / 1000000
+			buff2 = 0
 			percent := float64(buffin) / float64(total) * 100
-			nowcc := big.NewFloat(percent).SetPrec(3).String()
-			Logf("Now:|%6d|%6s %%|\n", buffin, nowcc)
+			progress := big.NewFloat(percent).SetPrec(3).String()
+			Logf("P - %s:%3dmb per sec|%6s %%|\n", ff.Name(), speed, progress)
+		}else{
+			buff2 = buff2 + bn
 		}
 	}
 	return err
@@ -238,6 +243,7 @@ func main() {
 				break
 			}
 			matches, _ := filepath.Glob(fmt.Sprintf("%s/*.plot", sourceDir))
+			//matches, _ := filepath.Glob(fmt.Sprintf("%s/*.bin", sourceDir))
 			Logf("Found plot files %d", len(matches))
 
 			if len(matches) > 0 {
